@@ -1,0 +1,3 @@
+To compile u need:
+    - Python 3.x
+    - Arduino IDE with ESP8266 plugin

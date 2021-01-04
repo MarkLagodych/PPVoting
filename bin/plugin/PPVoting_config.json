@@ -1,0 +1,19 @@
+{
+
+	"timer": {
+		"use": true,
+		"totalTime_min": 3, 
+		"blushTime_min": 2
+	},  
+	
+	"voting": {
+		"use": true,
+		"port": 3
+	},
+	
+	"logging": {
+		"use": true,
+		"file": "C:\\Users\\Марк\\Desktop\\PPVoting\\bin\\plugin\\PPVoting_log.txt"
+	}
+	
+}
