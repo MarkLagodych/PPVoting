@@ -1,21 +1,27 @@
-# Reads 2voter.ino.[platform].bin
-# and   voter.ino.[platform].bin,
-# finds a byte that is different.
-#
-# Modifying that byte in .bin file
-# is faster than modifying and compiling 
-# .ino files.
-#########################################################
+###########################################################
+# СКРИПТ СРАВНЕНИЯ И ЗАПИСИ ПРОШИВОК ДЛЯ ГОЛОСОВАЛОК      #
+# ------------------------------------------------------- #
+# Читает voter_2.bin и voter_3.bin, ищет различия         #
+# побайтово. Бинарные файды должны быть                   #
+# скомпилированными в Arduino IDE прошивками из src/voter #
+# с только одним различием - последним байтом IP-адреса.  #
+# Считается, что первое различие в байтах прошивок - это  #
+# и есть те самые IP-адреса (остальные отличия хоть и     #
+# возможны, но ни на что не влияют).                      #
+###########################################################
 
 import sys
-import esptool
+
+try:
+    import esptool
+except:
+    print("No esptool module found!")
 
 # Change if need
-platform = 'generic'
 port = 'COM7'
 
-file1 = open('2voter.ino.%s.bin' % platform, 'rb')
-file2 = open('voter.ino.%s.bin' % platform, 'rb')
+file1 = open('voter_2.bin', 'rb')
+file2 = open('voter_3.bin', 'rb')
 
 array1 = list(file1.read())
 array2 = list(file2.read())
@@ -47,36 +53,34 @@ if l1 == l2:
         i += 1
     print('')
 
-    if len(positions) == 2:
-        print('Count: 2 OK')
-        print('\n--------------- PRODUCING ---------------\n')
+    
+    print('\n--------------- PRODUCING ---------------\n')
 
-        while True:
-            ip = -1
-            while ip < 2  or ip > 254:
-                try:
-                    ip = int(input('IP: '))
-                except:
-                    print('Bad IP')
-            result = open('result.bin', 'wb')
-            array1[positions[0]] = ip
-            result.write(bytes(array1))
-            result.close()
-            print('Wrote to result.bin')
-            esptool.main(['--p',
-                          port,
-                          'erase_flash'])
-            esptool.main(['--p',
-                          port,
-                          '--baud',
-                          '460800',
-                          'write_flash',
-                          '--flash_size=detect',
-                          '0',
-                          'result.bin'])
+    while True:
+        ip = -1
+        while ip < 2  or ip > 254:
+            try:
+                ip = int(input('IP: '))
+            except:
+                print('Bad IP')
+        result = open('processed.bin', 'wb')
+        array1[positions[0]] = ip
+        result.write(bytes(array1))
+        result.close()
+        print('Wrote to result.bin')
+        esptool.main(['--p',
+                      port,
+                      'erase_flash'])
+        esptool.main(['--p',
+                      port,
+                      '--baud',
+                      '460800',
+                      'write_flash',
+                      '--flash_size=detect',
+                      '0',
+                      'processed.bin'])
         
-    else:
-        print('Count: %d FAIL' % len(positions))
+
 
 else:
     print('    FAIL\n')
