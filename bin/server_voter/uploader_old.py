@@ -11,11 +11,7 @@
 ###########################################################
 
 import sys
-
-try:
-    import esptool
-except:
-    print("No esptool module found!")
+import esptool
 
 # Change if need
 port = 'COM7'
@@ -58,11 +54,15 @@ if l1 == l2:
 
     while True:
         ip = -1
+        
         while ip < 2  or ip > 254:
             try:
                 ip = int(input('IP: '))
+            except KeyboardInterrupt:
+                sys.exit()
             except:
                 print('Bad IP')
+                
         result = open('processed.bin', 'wb')
         array1[positions[0]] = ip
         result.write(bytes(array1))
@@ -83,7 +83,7 @@ if l1 == l2:
 
 
 else:
-    print('    FAIL\n')
+    print('    Not equal: FAIL\n')
 
 input('\nExecution finished')
 
