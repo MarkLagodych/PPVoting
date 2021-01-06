@@ -27,7 +27,8 @@ port = 'COM3'
 
 def upload(firmware_file):
     '''
-    firmware_file should be a file name of a binary that was exported from Arduino IDE
+    firmware_file should be a file name of a binary
+    that was exported from Arduino IDE
     '''
     
     esptool.main([
@@ -54,12 +55,11 @@ settings = {
     'password':    'p',
     
     'ip':          'i',
-    'full_ip':     'f',
-    'subnet':      'b',
+    'full_ip':     'I',
+    'subnet':      'n',
     'gateway':     'g',
     
     'server_ip':   'v',
-    'server_port': 'o',
     'AP_mode':     'm', # Access Point mode (autonomic)
     
     'type':        't'
