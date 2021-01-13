@@ -20,8 +20,8 @@
  *                            КАК РАБОТАЕТ КОД                         *
  * ------------------------------------------------------------------- *
  *                           * Общение по WiFi *                       *
- * 0. Ожидание настроек: отослать "?" и ждать. Если пришло "!", войти  *
- *    в режим настройки, если нет, продолжить работу                   *
+ * 0. Ожидание настроек: если сразу после включения пришло "s",        *
+ *    войти в режим настройки, если нет, продолжить работу             *
  * 1. Поключиться к / Создать сеть WiFi.                               *
  * 2. Создать веб-сервер.                                              *
  * 3. При каждом запросе веб-страницы вида /Х, где Х - число от 0 до 6 * 
@@ -29,10 +29,21 @@
  * 4. Если по последовательному порту пришло "c", очистить все ответы, * 
  *    а если "g", то выслать JSON-строку с результатом                 *
  *                                                                     *
+ *                              РЕЖИМ НАСТРОЕК                         *
+ * ------------------------------------------------------------------- *
+ * Формат общения в режиме настроек такой: A[VD...]                    *
+ * A (action) - действие,                                              *
+ *    r - прочитать из EEPROM,                                         *
+ *    w - записать в EEPROM,                                           *
+ *    g - получить текущие настройки,                                  *
+ *    s - установить настройку. Для этого нужны следующие аргументы:   *
+ * V (variable) - короткое название настройки, один символ             *
+ *    (см. uploader.py)                                                *
+ * D... (data) - последующие данные, 1Б, 4Б или строка c NULL вконце   *
+ *                                                                     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <map>
-#include <cstring>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
@@ -40,9 +51,9 @@
 // ======================== Настройки сети ========================
 
 enum DeviceType {
-    VoterDevice,
-    ServerDevice,
-    ServerAPDevice // Access Point
+    VoterDevice = 1,
+    ServerDevice = 2,
+    ServerAPDevice = 3 // Access Point
 };
 
 class Settings {
@@ -91,19 +102,15 @@ public:
 
 // ===================================================================
 
-void setup() {
-
-    delay(1000);
-  
+void setup() {  
     Serial.begin(115200, SERIAL_8N1);
+    settings.start();
 
     // ----------- Режим настроек -----------
-    Serial.println("?");
-    delay(500);
-    settings.start();
     
+    delay(5000);
     if (Serial.available())
-        if (Serial.read() == '!') 
+        if (Serial.read() == 's') 
             settings.settingsMode();
             
     settings.load();
@@ -118,8 +125,10 @@ void setup() {
         
         Serial.print("Connecting");
         WiFi.begin(settings.ssid, settings.password);
-        while (WiFi.status() != WL_CONNECTED)
+        while (WiFi.status() != WL_CONNECTED) {
             Serial.print(".");
+            delay(700);
+        }
         Serial.println();
     }
   
@@ -253,7 +262,22 @@ void Settings::settingsMode() {
             switch (action) {
               
                 case 's': {  // Set
+
+                    // Небольщой таймаут, чтобы загрузился следующий символ
+                    for (int i=0; i<10; i++) {
+                        if (Serial.available())
+                            break;
+                        delay(100);
+                    }
+
+                    if (!Serial.available()) {
+                        Serial.println("Variable name is not given");
+                        continue;
+                    }
+
+                    // Читаем символ -- название переменной для настройки
                     char var = Serial.read();
+                    
                     switch (var) {
 
                         // Ip
@@ -282,15 +306,25 @@ void Settings::settingsMode() {
                             break;  
 
                         // Ssid
-                        case 's':
-                            Serial.readBytesUntil(0, ssid, 31);
-                            ssid[31] = 0;
+                        case 's': {
+                            size_t written = Serial.readBytesUntil(0, ssid, 31);
+                            ssid[written] = 0;
                             break;
+                        }
 
                         // Password
-                        case 'p':
-                            Serial.readBytesUntil(0, password, 63);
-                            password[63] = 0;
+                        case 'p': {
+                            size_t written = Serial.readBytesUntil(0, password, 63);
+                            password[written] = 0;
+                            break;
+                        }
+
+                        default:
+                            Serial.print("Unknown variable ");
+                            Serial.print(var, DEC);
+                            Serial.print(" \"");
+                            Serial.print(var);
+                            Serial.println("\"");
                             break;
                         
                     } // switch (var)
@@ -316,8 +350,8 @@ void Settings::settingsMode() {
                     Serial.print("IP: ");
                     printArray(ip);
 
-                    Serial.print("Server IP: ");
-                    printArray(ip);
+                    Serial.print("Server IP [not used]: ");
+                    printArray(server_ip);
 
                     Serial.print("Gateway: ");
                     printArray(gateway);
@@ -334,8 +368,11 @@ void Settings::settingsMode() {
                     return;
 
                 default: {
-                    Serial.print("Unknown action: ");
-                    Serial.println(action);
+                    Serial.print("Unknown action ");
+                    Serial.print(action, DEC);
+                    Serial.print(" \"");
+                    Serial.print(action);
+                    Serial.println("\"");
                     break;
                 }
             } // switch (action)
@@ -398,6 +435,8 @@ void Settings::save() {
 
     for (int i=0; i<63; i++)
         NEXT(password[i]);
+
+    EEPROM.commit();
 
 #undef NEXT
 

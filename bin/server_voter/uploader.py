@@ -1,6 +1,7 @@
 import sys
 import os
 import io
+from time import sleep
 
 try:
     import serial
@@ -63,44 +64,64 @@ settings_dict = {
     'type':        't'
 }
 
+TYPE_VOTER = 1
+TYPE_SERVER = 2 # External Wi-Fi network
+TYPE_SERVER_AP = 3 # AccessPoint - create its own Wi-Fi network
+
 def translateSetting(s):
-    keys = list(settings.keys())
+    keys = list(settings_dict.keys())
     assert keys.count(s) != 0, "'%s' is not a setting!" % s
     return bytes(settings_dict[s], encoding = 'ASCII')
 
 ser = serial.Serial()
 
 def beginSettings(freq = 115200):
-    if ser.is_open():
+    if ser.is_open:
         ser.close()
     ser.baudrate = freq
     ser.port = port
+    ser.timeout = 5 # seconds
     ser.open()
-    start = ser.readline()
-    assert start == "?\n", "Failed to enter setting mode, incorrect respond: %s" % str(start) 
-    ser.write(b'!')
-    print(ser.readline())
+
+    sleep(1) # sec
+    
+    query(b's') # Setting mode
         
 def endSettings():
-    if ser.is_open():
+    if ser.is_open:
         ser.write(b'e')    # End
         ser.close()
 
-def query(q):
-    if not ser.is_open():
-        print('Serial port %s is not opened!' % port)
-        return None
+def query(q, wait = False):
+    '''If wait is True, waits for respond and prints it'''
+    assert ser.is_open, 'Serial port %s is not opened!' % port
     ser.write(q)
-    if ser.in_waiting():
-        return ser.readline()
-    else
-        return '{No response given}'
+
+    if wait:
+        sleep(5) # sec
+        if ser.in_waiting > 0:
+            res = ser.read(size = ser.in_waiting)
+            # backslashreplace -- replace all non-ASCII symbols with "\\xYZ"
+            # where YZ is a hex code
+            print(res.decode(encoding='ASCII', errors='backslashreplace'))
+
+def readSettings():
+    '''
+    Read settings from EEPROM to RAM
+    '''
+    query(b'r') # Read
+
+def writeSettings():
+    '''
+    Write settings from RAM to EEPROM
+    '''
+    query(b'w') # Write
 
 def getSettings():
     '''
     Query all the settings of a connected device
     '''
-    print(query(b'g')) # Get
+    query(b'g', True) # Get
 
 def setSetting(setting, value):
     '''
@@ -109,14 +130,15 @@ def setSetting(setting, value):
 
     if type(value) != bytes:
         if type(value) == str:
-            value = bytes(value, encoding = 'ASCII')
+            value = bytes(value, encoding = 'ASCII') + bytes([0])
         elif type(value) in [int, bool]:
             value = bytes([value])
         else:
             value = bytes(value)
-            
-    query = b's' + translateSetting(setting) + value # Set
-    print(queryRaw(query))
+
+    # s - Set
+    q = b's' + translateSetting(setting) + value
+    query(q)
     
 
 def devices():
