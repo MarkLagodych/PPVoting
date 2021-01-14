@@ -12,138 +12,117 @@
  *                            КАК РАБОТАЕТ КОД                         *
  * ------------------------------------------------------------------- *
  *                           * Общение по WiFi *                       *
+ * 0. Если при включении нажата средняя кнопка, войти в режим настроек *
  * 1. Поключиться к сети WiFi, используя статический IP (быстрее, чем  *
  *    автоматический).                                                 *
  * 2. Проверить кнопки (7).                                            *
- * 3. Если какая-либо нажата, то запросить веб-страницу вида /Х,       *
- *    где Х - число от 0 до 6                                          *
- * 4. Все действия подтверждаются свечением сетодиода. Чтобы его       *
- *    включить, на него нужно подать низкий уровень (LOW) и наоборот - *
- *    высокий уровень (HIGH), чтобы выключить. Объявлены макросы       *
- *    LED_ON и LEN_OFF чтобы избавиться от путаницы.                   *
- *                                                                     *
- *                                                                     *
- *                            КАК ПРОШИВАТЬ ПУЛЬТЫ                     *
- * ------------------------------------------------------------------- *
- * 1. Скомпилировать и экспортировать две прошивки с разными IP        *
- *    и положить в папку PPVoting/bin/server_voter с названиями        *
- *    voter_2.bin и voter_3.bin (с myIp соответственно 2 и 3).         *
- * 2. Запустить программу-анализатор process_upload.py в той же папке. *
- *    С её помощью можно обойти долгий процесс перекомпиляции кода, в  *
- *    котором изменяются всего пара символов.                          *
+ * 3. Если какая-либо нажата, то запросить веб-страницу вида           *
+ *    http://A.B.C.D/Х                                                 *
+ *    где A.B.C.D - IP сервера, Х - номер варианта (от 0 до 6)         *
  *                                                                     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
- 
+#include <cstring>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
+#include "settings.h"
 
-
-
-/* Прошивать ESP8266 только с перемычкой (GPIO_0 -> GND) ?
- * Если да (у нас умные модули со встроенными USB-переходниками), то при включении задержаться
- * Выполнение программы не даёт перепрошится.
- * Если нет (у нас готовые голосовалки с предусмотреным местом для перемычки), то всё хорошо.
- */
-#define FLASH_WITH_JUMPER_ONLY true
-
-
-// =============================== Настройки сети ==============================
 
 HTTPClient http;
 
-const String 
-  ssid     = "ArbUZ361",               // Название WiFi-сети
-  password = "gumANOId1",              // Пароль
-  url      = "http://192.168.1.1:80/"; // Адрес веб-сервера, которому посылать ответы
-
-
-const unsigned char                    // Последняя часть статического IP-адреса.
-   myIp = 3;                           // Менять только значение этой переменной!
-                              
-
-IPAddress 
-  ip(192, 168, 1, 19);                 // IP-адрес данного устройства. Число 19 не важно.
-
-const IPAddress
-  gateway(192, 168, 1, 1),             // Шлюз
-  subnet(255, 255, 255, 0);            // Маска подсети
-
-
-// ================================ Настройки кнопок =============================
+const char *reqf = "http://%i.%i.%i.%i/%s";
+char request[64];
 
 void vote(int variant);      // Посылает веб-серверу выбранный вариант ответа ("голосует")
 
-int ports[] = {              // Порты кнопок
+const int ports[] = {        // Порты кнопок
   16, 14, 12, 13, 5, 4, 15
 };
 
 
-// =========================== Макроопределения для светодиода ====================
+void blink(int delay_time) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(delay_time);
+    digitalWrite(LED_BUILTIN, LOW);
+}
 
-#define LED_SETUP     pinMode(2, OUTPUT);
-#define LED_ON        digitalWrite(2, LOW);
-#define LED_OFF       digitalWrite(2, HIGH);
-#define LED_BLINK(ms) LED_ON delay(ms); LED_OFF
-
-
-// =================================== Основной код ===============================
 
 void setup() {
 
-#if !FLASH_WITH_JUMPER_ONLY
-  delay(6000);
-#endif
+    Serial.begin(115200, SERIAL_8N1);
+  
+    // Настройка портов для кнопок
+    for(int port : ports) {
+        pinMode(port, INPUT); 
+        digitalWrite(port, LOW);
+    }
 
-  // Настройка портов для кнопок
-  for(int port : ports) {
-    pinMode(port, INPUT); 
-    digitalWrite(port, LOW);
-  }
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, LOW);
 
-  LED_SETUP
-  LED_OFF
+    // "Настройка настраивания"
+    settings.start();
 
-  // Настройка и подключение к WiFi-сети.
-  // Если успешно подключено, моргнуть светодиодом.
-  WiFi.begin(ssid, password);
-  ip[3] = myIp;
-  WiFi.config(ip, gateway, subnet);
-  while (WiFi.status() != WL_CONNECTED) 
-    delay(1000);
+    if (digitalRead(ports[3]))
+        settings.settingsMode();
 
-  LED_BLINK(1000)
+    settings.load();
+
+    // При первом включении в памяти не будет правильных настроек
+    // Тогда продолжать нет смысла, всё равно не выйдет
+    // Значит, всё, что остаётся делать - ждать настроек
+    while (settings.type != VoterDevice)
+        settings.settingsMode();
+
+    Serial.end();
+
+    blink(500);
+  
+    // Настройка и подключение к WiFi-сети.
+    // Если успешно подключено, моргнуть светодиодом.
+    WiFi.begin(settings.ssid, settings.password);
+    WiFi.config(settings.ip, settings.gateway, settings.subnet);
+    while (WiFi.status() != WL_CONNECTED) 
+        delay(1000);    
+  
+    blink(1000);
 }
 
 
 void loop() {
     
-  for(int i=0; i<7; i++) {
+    for(int i=0; i<7; i++) {
+        
+        if(digitalRead(ports[i])) {
+            vote(i); 
+            break;
+        }
       
-    if(digitalRead(ports[i])) {
-      vote(i); 
-      break;
     }
     
-  }
-  
-  delay(100);
+    delay(100);
   
 }
 
 
-// ======================== Реализация голосования ==========================
-
 void vote(int variant) {
     
-  if(WiFi.status() == WL_CONNECTED)
-      
-    // Запросить, например, http://192.168.1.1:80/5 (если нажата 5-я кнопка)
-    if(http.begin(url + variant)) {
-      http.GET();
-      http.end();
+    if(WiFi.status() == WL_CONNECTED) {
 
-      LED_BLINK(700);
+        sprintf(request, reqf,
+        (int) settings.ip[0],
+        (int) settings.ip[1],
+        (int) settings.ip[2],
+        (int) settings.ip[3],
+        (int) variant);
+        
+        if(http.begin(request)) {
+          http.GET();
+          http.end();
+    
+          blink(700);
+        }
+  
     }
     
 }

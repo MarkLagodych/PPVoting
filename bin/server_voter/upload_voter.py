@@ -3,14 +3,15 @@ from uploader import *
 setPort('COM4')
 
 print('Uploading firmware...')
-#upload('server.bin')
+upload('voter.bin')
 
 print()
 print('Entering settings mode...')
 beginSettings()
 
-print('Current settings:')
 readSettings()
+
+print('Current settings:')
 getSettings()
 
 print('Writing settings...')
@@ -28,4 +29,3 @@ readSettings()
 getSettings()
 
 endSettings()
-

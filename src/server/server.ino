@@ -72,6 +72,12 @@ void setup() {
             settings.settingsMode();
             
     settings.load();
+    
+    // При первом включении в памяти не будет правильных настроек
+    // Тогда продолжать нет смысла, всё равно не выйдет
+    // Значит, всё, что остаётся делать - ждать настроек
+    while (settings.type != ServerDevice && settings.type != ServerAPDevice)
+        settings.settingsMode();
 
     if (settings.type == ServerAPDevice) {
       
@@ -92,11 +98,6 @@ void setup() {
         }
         Serial.println();
         
-    } else {
-      
-        while (1)
-          settings.settingsMode();
-          
     }
   
     server.on("/", respond);

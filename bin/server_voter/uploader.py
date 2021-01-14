@@ -88,11 +88,11 @@ def beginSettings(freq = 115200):
     ser.baudrate = freq
     ser.port = port
     ser.timeout = 5 # seconds
-    ser.open()
 
-    sleep(2) # sec
-    
-    query(b's') # Setting mode
+    ser.open()
+    ser.reset_input_buffer()
+    sleep(0.5)
+    query(b's') # s -- Setting mode
         
 def endSettings():
     if ser.is_open:
@@ -102,15 +102,20 @@ def endSettings():
 def query(q, wait = False):
     '''If wait is True, waits for respond and prints it'''
     assert ser.is_open, 'Serial port %s is not opened!' % port
+
     ser.write(q)
 
     if wait:
-        sleep(5) # sec
-        if ser.in_waiting > 0:
+        sleep(0.5) # sec
+        while ser.in_waiting == 0:
+            sleep(0.5)
+        while ser.in_waiting > 0:
             res = ser.read(size = ser.in_waiting)
             # backslashreplace -- replace all non-ASCII symbols with "\\xYZ"
             # where YZ is a hex code
             print(res.decode(encoding='ASCII', errors='backslashreplace'))
+
+            sleep(0.5)
 
 def readSettings():
     '''
