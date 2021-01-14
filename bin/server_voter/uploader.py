@@ -91,6 +91,7 @@ def beginSettings(freq = 115200):
 
     ser.open()
     ser.reset_input_buffer()
+    ser.reset_output_buffer()
     sleep(0.5)
     query(b's') # s -- Setting mode
         

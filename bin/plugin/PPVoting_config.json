@@ -8,7 +8,7 @@
 	
 	"voting": {
 		"use": true,
-		"port": 3
+		"port": 4
 	},
 	
 	"logging": {

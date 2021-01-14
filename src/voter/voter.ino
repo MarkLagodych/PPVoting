@@ -8,7 +8,6 @@
  *       2. посылать результат на веб-сервер через WiFi.               *
  * ------------------------------------------------------------------- *
  *                                                                     *
- *                                                                     *
  *                            КАК РАБОТАЕТ КОД                         *
  * ------------------------------------------------------------------- *
  *                           * Общение по WiFi *                       *
@@ -19,6 +18,11 @@
  * 3. Если какая-либо нажата, то запросить веб-страницу вида           *
  *    http://A.B.C.D/Х                                                 *
  *    где A.B.C.D - IP сервера, Х - номер варианта (от 0 до 6)         *
+ * ------------------------------------------------------------------- *
+ *                                                                     *
+ *                            БАГ СО СВЕТОДИОДОМ                       *
+ * ------------------------------------------------------------------- *
+ * При подаче HIGH на светодиод, он гаснет, а при LOW, он светится...  *
  *                                                                     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -30,7 +34,7 @@
 
 HTTPClient http;
 
-const char *reqf = "http://%i.%i.%i.%i/%s";
+const char *reqf = "http://%i.%i.%i.%i/%i";
 char request[64];
 
 void vote(int variant);      // Посылает веб-серверу выбранный вариант ответа ("голосует")
@@ -41,9 +45,9 @@ const int ports[] = {        // Порты кнопок
 
 
 void blink(int delay_time) {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(delay_time);
     digitalWrite(LED_BUILTIN, LOW);
+    delay(delay_time);
+    digitalWrite(LED_BUILTIN, HIGH);
 }
 
 
@@ -58,7 +62,7 @@ void setup() {
     }
 
     pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(LED_BUILTIN, HIGH);
 
     // "Настройка настраивания"
     settings.start();
@@ -110,10 +114,10 @@ void vote(int variant) {
     if(WiFi.status() == WL_CONNECTED) {
 
         sprintf(request, reqf,
-        (int) settings.ip[0],
-        (int) settings.ip[1],
-        (int) settings.ip[2],
-        (int) settings.ip[3],
+        (int) settings.server_ip[0],
+        (int) settings.server_ip[1],
+        (int) settings.server_ip[2],
+        (int) settings.server_ip[3],
         (int) variant);
         
         if(http.begin(request)) {
