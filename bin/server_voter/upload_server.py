@@ -1,5 +1,7 @@
 from uploader import *
 
+setPort('COM3')
+
 print('Uploading firmware...')
 upload('server.bin')
 

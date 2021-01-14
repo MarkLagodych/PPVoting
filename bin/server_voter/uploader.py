@@ -22,7 +22,14 @@ except:
 # -----------------------  Globals -----------------------
 
 # Serial port for uploading firmware / configuring device
-port = 'COM3'
+port = 'COM1'
+
+def setPort(p):
+    global port
+    port = p
+
+def getPort():
+    return port
 
 # --------------- Functions that you can use -------------
 
@@ -83,7 +90,7 @@ def beginSettings(freq = 115200):
     ser.timeout = 5 # seconds
     ser.open()
 
-    sleep(1) # sec
+    sleep(2) # sec
     
     query(b's') # Setting mode
         
