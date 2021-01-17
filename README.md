@@ -8,11 +8,11 @@
 
 1. **Голосовалки** (пульты голосования) с 7-ю кнопками. На них нажимают слушатели. Одна кнопка - один вариант ответа.
 
-    ![Voter]()
+    ![Voter](https://github.com/MarkLagodych/assets/blob/main/PPVoting/voter.jpg?raw=true)
     
 2. **Сервер** - аппарат, втыкающийся в компьютер докладчика. К нему по Wi-Fi подключаются голосовалки и передают нажатия кнопок.
 
-    ![Server]()
+    ![Server](https://github.com/MarkLagodych/assets/blob/main/PPVoting/server.jpg?raw=true)
 
 3. **Плагин** для Microsoft PowerPoint - состоит из нескольких компонентов:
 
@@ -42,13 +42,13 @@
 
     2. **Диаграмма** - отображает статистику ответов.
 
-        ![Diagram]()
+        ![Diagram](https://github.com/MarkLagodych/assets/blob/main/PPVoting/diagram.PNG?raw=true)
     
     3. **Таймер** - небольшой прямоугольник в углу слайда с текущим временем и временем до конца доклада. За заданное кол-во минут до конца он должен сменить цвет на красноватый.
 
-        ![Normal]()
+        ![Normal](https://github.com/MarkLagodych/assets/blob/main/PPVoting/timer1.PNG?raw=true)
         
-        ![Red]()
+        ![Red](https://github.com/MarkLagodych/assets/blob/main/PPVoting/timer2.PNG?raw=true)
         
 # Примечания
 
