@@ -2,12 +2,12 @@
 
 	"timer": {
 		"use": true,
-		"totalTime_min": 3, 
-		"blushTime_min": 2
+		"totalTime_min": 5, 
+		"blushTime_min": 1
 	},  
 	
 	"voting": {
-		"use": true,
+		"use": false,
 		"port": 4
 	},
 	

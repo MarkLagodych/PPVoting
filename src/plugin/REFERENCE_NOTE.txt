@@ -6,4 +6,3 @@
 	Microsoft Office 16.0 Object Library
 	Microsoft Forms 2.0 Object Library
 	Microsoft Scripting Runtime
-Не знаю, все ли они нужны, но "Microsoft Scripting Runtime" обязательна для библиотеки VBA-JSON (в проекте просто Json).

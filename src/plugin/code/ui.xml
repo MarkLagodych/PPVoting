@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!--
+    PPVoting tab for PowerPoint ribbon
+    
+    Module PPVotingUI contains all callbacks for UI
+    
+    All editBoxes are binded to ProcessText for "onChange" event, giving a unique tag to each
+    and to GetText for "getText" event
+    
+    All checkBoxes are binded to ProcessBool for "onAction" event, giving a unique tag to each
+    and to GetBool for "getPressed" event
+    
+    ProcessText and ProcessBool automatically save settings to registry
+    
+    Every tag MUST be X.Y where X is a name of a settings section and Y is a setting key
+-->
+
+<customUI
+    xmlns = "http://schemas.microsoft.com/office/2006/01/customui"
+    onLoad = "PPVotingUI.OnUILoaded"> 
+    
+    <ribbon> 
+    
+        <tabs> 
+        
+            <tab id = "PPVotingTab"
+                label = "PPVoting"> 
+                
+                <!--                
+                    <group id = "ActionsGroup"
+                        label = "Actions">
+                        
+                        <button id = "SaveSettingsBtn"
+                            label = "Save settings"
+                            imageMso = "FileSave"
+                            screentip = "Save settings to registry"
+                            size = "large"
+                            onAction = "PPVotingUI.SaveSettings"/>
+                        
+                        <button id = "LoadSettingsBtn"
+                            label = "Load settings"
+                            imageMso = "FileOpen"
+                            screentip = "Load settings from registry"
+                            size = "large"
+                            onAction = "PPVotingUI.LoadSettings"/>
+                            
+                    </group>
+                -->
+                
+                <group id = "UsageGroup"
+                    label = "Usage">
+                    
+                    <checkBox id = "UseTimerCb"
+                        label = "Timer"
+                        screentip = "Should timer component be used?"
+                        onAction = "PPVotingUI.ProcessBool"
+                        tag = "timer.use"
+                        getPressed = "PPVotingUI.GetBool"/>
+                        
+                    <checkBox id = "UseVotingCb"
+                        label = "Voting"
+                        screentip = "Should voting component be used?"
+                        onAction = "PPVotingUI.ProcessBool"
+                        tag = "voting.use"
+                        getPressed = "PPVotingUI.GetBool"/>
+                        
+                    <checkBox id = "UseLoggingCb"
+                        label = "Logging"
+                        screentip = "Should PPVoting log all its actions?"
+                        onAction = "PPVotingUI.ProcessBool"
+                        tag = "logging.use"
+                        getPressed = "PPVotingUI.GetBool"/>
+                
+                </group>
+                
+                
+                <group id = "TimerGroup"
+                    label = "Timer">
+                        
+                    <editBox id = "TimeEb"
+                        label = "Time:"
+                        screentip = "Time for countdown"
+                        sizeString = "8888"
+                        onChange = "PPVotingUI.ProcessText"
+                        tag = "timer.total_time"
+                        getText = "PPVotingUI.GetText"/>
+                    
+                    <editBox id = "BlushTimeEb"
+                        label = "Blush:"
+                        screentip = "Blush this time to the end"
+                        sizeString = "8888"
+                        onChange = "PPVotingUI.ProcessText"
+                        tag = "timer.blush_time"
+                        getText = "PPVotingUI.GetText"/>
+                
+                </group>
+                
+                <group id = "VotingGroup"
+                    label = "Voting">
+                    
+                    <box id = "VotingBox"
+                        boxStyle = "vertical">
+                    
+                        <box id = "VotingTopBox"
+                            boxStyle = "horizontal">
+                            
+                            <editBox id = "ComPortEb"
+                                label = "COM:"
+                                screentip = "COM port"
+                                sizeString = "888"
+                                onChange = "PPVotingUI.ProcessText"
+                                tag = "voting.port"
+                                getText = "PPVotingUI.GetText"/>
+                                
+                            <button id = "CheckComPortBtn"
+                                label = "Check"
+                                imageMso = "ErrorChecking"
+                                screentip = "Check connection (send a validation request to the server via this port)"
+                                onAction = "PPVotingUI.CheckConnection"/>
+                                
+                        </box>
+                        
+                        <labelControl id = "DiagramSizeDescL"
+                                label = "Diagram size:"/>    
+                                
+                        <box id = "DiagramSizeBox"
+                            boxStyle = "horizontal">
+                            
+                            <editBox id = "DiagramWidthEb"
+                                screentip = "Diagram width"
+                                sizeString = "8888"
+                                onChange = "PPVotingUI.ProcessText"
+                                tag = "voting.diagram_width"
+                                getText = "PPVotingUI.GetText"/>
+                                
+                            <labelControl id = "SizeSeparatorL"
+                                label = " x"/>
+                                
+                            <editBox id = "DiagramHeightEb"
+                                screentip = "Diagram height"
+                                sizeString = "8888"
+                                onChange = "PPVotingUI.ProcessText"
+                                tag = "voting.diagram_height"
+                                getText = "PPVotingUI.GetText"/>
+                                
+                             <editBox id = "DiagramGapEb"
+                                label = " gap:"
+                                screentip = "A gap between the value bars"
+                                sizeString = "8888"
+                                onChange = "PPVotingUI.ProcessText"
+                                tag = "voting.diagram_gap"
+                                getText = "PPVotingUI.GetText"/>
+                            
+                        </box>
+                    
+                    </box>
+                
+                </group>
+                
+                <group id = "LoggingGroup"
+                    label = "Logging">
+                    
+                    <button id = "ChooseLogFileBtn"
+                        label = "Choose log file"
+                        imageMso = "FileOpen"
+                        screentip = "Choose log file"
+                        size = "large"
+                        onAction = "PPVotingUI.ChooseLogFile"/>
+                    
+                    <button id = "ViewLogFileBtn"
+                        label = "View log file"
+                        imageMso = "ViewDraftView"
+                        screentip = "View log file"
+                        size = "large"
+                        onAction = "PPVotingUI.ViewLogFile"/>
+                
+                </group>
+                
+                <group id = "SpecialActionsGroup"
+                    label = "Special actions">
+                
+                    <button id = "DvcMgrBtn"
+                        label = "Device manager"
+                        imageMso = "ControlSetControlDefaults"
+                        screentip = "Open device manager"
+                        size = "large"
+                        onAction = "PPVotingUI.OpenDeviceManager"/>
+                    
+                    <button id = "RemoveSettingsBtn"
+                        label = "Remove settings"
+                        imageMso = "Clear"
+                        screentip = "Remove PPVoting settings from registry"
+                        size = "large"
+                        onAction = "PPVotingUI.RemoveSettings"/> 
+                    
+                </group>
+                
+            </tab> 
+            
+        </tabs> 
+        
+    </ribbon> 
+    
+</customUI> 

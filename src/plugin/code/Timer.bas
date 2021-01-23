@@ -9,7 +9,7 @@ Attribute VB_Name = "Timer"
 '     до конца презентации в формате ММ:СС;                           '
 '   - за указанное кол-во минут до конца, сменить фон на красноватый; '
 '   - если в данный момент идёт анимированная смена слайдов, то       '
-'     остановиться на заданноое кол-во секунд во избежание мигания.   '
+'     остановиться на некоторое кол-во секунд во избежание мигания.   '
 '     Дело в том, что слайд логически ещё не сменился на следующий, а '
 '     отрисовка таймера осуществляется на текущем. То есть, анимация  '
 '     прерывается на возврат к текущему слайду, происходит отрисовка  '
@@ -38,14 +38,10 @@ Public endTime As Long     ' Время конца презентации
 
 Public blushTime As Long   ' Кол-во минут до конца чтобы покраснеть
 
-Public idleTime As Integer ' Время простоя - если нажата хоть одна кнопка
-                           ' смены слайдов, остановить обновление таймера
-                           ' на это время
-
 Public timerID             ' Системный ID таймера
 
 ' Оставшееся время простоя
-Private remainingIdleTime As Integer
+Private remainingIdleTime As Long
 
 
 Public Sub start()
@@ -65,7 +61,7 @@ Public Sub start()
         Err.Raise 0, Description:="timer.totalTime_min or timer.blushTime_min are invalid"
     End If
     
-    ' Чтение настроек из общево файла конфигурации PPVoting
+    ' Чтение настроек из общего файла конфигурации PPVoting
     If Not Base.settings("timer").Exists("totalTime_min") Then
         endTime = currentTime + 15 * 60 ' 15 минут
     Else
@@ -107,10 +103,15 @@ End Sub
 
 
 Function getTime() As Long
+    On Error GoTo Error_label
 
     Dim currentMoment
     currentMoment = Now()
     getTime = Hour(currentMoment) * 3600 + Minute(currentMoment) * 60 + Second(currentMoment)
+    
+    Exit Function
+Error_label:
+    Base.ShowError "Timer.getTime"
     
 End Function
 
@@ -120,11 +121,15 @@ Sub Run()
     
     If Diagram.Visible Then Exit Sub ' Тоже избежание мигания
     
-    Dim slideIndex As Integer
+    If SlideShowWindows(1).View.CurrentShowPosition > ActivePresentation.Slides.Count Then Exit Sub
+    
+    Dim slideIndex As Long
     slideIndex = ActivePresentation.SlideShowWindow.View.slide.slideIndex
     
     Dim myslide As slide
-    Set myslide = ActivePresentation.Slides(slideIndex)
+    Set myslide = ActivePresentation.SlideShowWindow.View.slide
+    
+    If myslide Is Nothing Then Exit Sub
     
     Dim key As Variant
     For Each key In Base.forwardKeys
@@ -156,7 +161,7 @@ Sub Run()
                 .Fill.BackColor.RGB = RGB(255, 255, 255)
                 .TextFrame.TextRange.Font.Color.RGB = RGB(0, 0, 0)
                 .name = TimerShapeName
-                .TextFrame.TextRange.Text = FormatTime() ' 12:34:56 | 01:23
+                .TextFrame.TextRange.Text = FormatTime() ' "12:34:56 | 01:23"
                 .TextFrame.TextRange.Font.name = "Arial"
                 .TextFrame.TextRange.Font.Bold = True
                 .TextFrame.TextRange.Font.Size = 12
@@ -170,7 +175,7 @@ Sub Run()
                 myshape.Fill.BackColor.RGB = RGB(255, 255, 255)
             End If
             
-            myshape.TextFrame.TextRange.Text = FormatTime() ' 12:34:56 | 01:23
+            myshape.TextFrame.TextRange.Text = FormatTime() ' "12:34:56 | 01:23"
         End If
         
     End If ' remainingIdleTime = 0
@@ -183,7 +188,7 @@ Error_label:
 End Sub
 
 
-Function getShapeByName(name As String, slideIndex As Integer) As Shape
+Function getShapeByName(name As String, ByVal slideIndex As Long) As Shape
     On Error GoTo Error_label
     
     Dim currentSlide As slide
@@ -211,7 +216,7 @@ End Function
 ' Получить 2 символа
 ' "1" -> "01"
 ' "37" -> "37"
-Function get2(x As Integer) As String
+Function get2(ByVal x As Integer) As String
     If Len("" & x) = 1 Then
         get2 = "0" & x
     Else
@@ -225,6 +230,7 @@ Function FormatTime() As String
 
     Dim remainingTime As Long
     remainingTime = endTime - currentTime
+    If remainingTime < 0 Then remainingTime = 0
 
     FormatTime = "" _
         & get2(currentTime \ 3600) _
