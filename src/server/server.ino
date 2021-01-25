@@ -132,6 +132,10 @@ void loop() {
         case 'g':           // 'g' - get results
             voting.send();
             break;
+
+        case 'k':           // 'k' - validation request
+            Serial.print("OK");
+            break;
       
         }
     
