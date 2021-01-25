@@ -51,28 +51,8 @@ Public Sub start()
     
     currentTime = getTime()
     
-    If Not Base.settings("timer").Exists("totalTime_min") _
-    Or Not Base.settings("timer").Exists("blushTime_min") Then
-        Err.Raise 0, Description:="timer.totalTime_min or timer.blushTime_min do not exist"
-    End If
-    
-    If notNumber(Base.settings("timer")("totalTime_min")) _
-    Or notNumber(Base.settings("timer")("blushTime_min")) Then
-        Err.Raise 0, Description:="timer.totalTime_min or timer.blushTime_min are invalid"
-    End If
-    
-    ' Чтение настроек из общего файла конфигурации PPVoting
-    If Not Base.settings("timer").Exists("totalTime_min") Then
-        endTime = currentTime + 15 * 60 ' 15 минут
-    Else
-        endTime = currentTime + Base.settings("timer")("totalTime_min") * 60
-    End If
-    
-    If Not Base.settings("timer").Exists("blushTime_min") Then
-        blushTime = 3 * 60 ' 3 минуты
-    Else
-        blushTime = Base.settings("timer")("blushTime_min") * 60
-    End If
+    endTime = currentTime + Base.settings("timer")("total_time") * 60
+    blushTime = Base.settings("timer")("blush_time") * 60
     
     timerID = Base.SetTimer(0, 0, 1000, AddressOf Run) ' Повторять каждые 1000 мс
     
@@ -92,6 +72,14 @@ Public Sub finish()
     If started Then
         Base.KillTimer 0, timerID
     End If
+    
+    ' Очищаем все слайды от созданных прямоугольников
+    Dim slideIndex As Long
+    For slideIndex = 1 To ActivePresentation.Slides.Count
+        Dim myshape As shape
+        Set myshape = getShapeByName(TimerShapeName, slideIndex)
+        If Not myshape Is Nothing Then myshape.Delete
+    Next slideIndex
     
     started = False
         
@@ -119,8 +107,10 @@ End Function
 Sub Run()
     On Error GoTo Error_label
     
-    If Diagram.Visible Then Exit Sub ' Тоже избежание мигания
+    If diagram.Visible Then Exit Sub ' Тоже избежание мигания
     
+    ' Если все слайды прокликали и зашли на чёрный слайд вконце, не пытаться рисовать
+    ' На нём нельзя рисовать
     If SlideShowWindows(1).View.CurrentShowPosition > ActivePresentation.Slides.Count Then Exit Sub
     
     Dim slideIndex As Long
@@ -131,6 +121,7 @@ Sub Run()
     
     If myslide Is Nothing Then Exit Sub
     
+    ' Задержка во ис
     Dim key As Variant
     For Each key In Base.forwardKeys
         If Base.CheckKeyPressed(key) Then remainingIdleTime = myslide.SlideShowTransition.Duration
@@ -147,11 +138,7 @@ Sub Run()
 
         currentTime = getTime()
         
-        ' Первый слайд обязан иметь ТОЛЬКО надпись с путём к файлу настроек PPVoting!
-        ' Поэтому, на нём нельзя рисовать
-        If slideIndex = 1 Then Exit Sub
-        
-        Dim myshape As Shape
+        Dim myshape As shape
         Set myshape = getShapeByName(TimerShapeName, slideIndex)
     
         ' Создать/изменить вид и содержание прямоугольника
@@ -161,7 +148,7 @@ Sub Run()
                 .Fill.BackColor.RGB = RGB(255, 255, 255)
                 .TextFrame.TextRange.Font.Color.RGB = RGB(0, 0, 0)
                 .name = TimerShapeName
-                .TextFrame.TextRange.Text = FormatTime() ' "12:34:56 | 01:23"
+                .TextFrame.TextRange.text = FormatTime() ' "12:34:56 | 01:23"
                 .TextFrame.TextRange.Font.name = "Arial"
                 .TextFrame.TextRange.Font.Bold = True
                 .TextFrame.TextRange.Font.Size = 12
@@ -175,7 +162,7 @@ Sub Run()
                 myshape.Fill.BackColor.RGB = RGB(255, 255, 255)
             End If
             
-            myshape.TextFrame.TextRange.Text = FormatTime() ' "12:34:56 | 01:23"
+            myshape.TextFrame.TextRange.text = FormatTime() ' "12:34:56 | 01:23"
         End If
         
     End If ' remainingIdleTime = 0
@@ -188,7 +175,7 @@ Error_label:
 End Sub
 
 
-Function getShapeByName(name As String, ByVal slideIndex As Long) As Shape
+Function getShapeByName(name As String, ByVal slideIndex As Long) As shape
     On Error GoTo Error_label
     
     Dim currentSlide As slide

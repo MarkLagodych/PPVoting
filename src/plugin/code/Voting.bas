@@ -9,6 +9,8 @@ Attribute VB_Name = "Voting"
 '   - по команде "показать", отослать на сервер 'g', прин€ть ответ и  '
 '     отобоазить его на диаграмме;                                    '
 '   - по команде "стереть", отослать на сервер 'с'.                   '
+'   - вне показа слайдов предоставл€ть проверку подключени€ к серверу '
+'     (см. ui.xml)                                                    '
 '                                                                     '
 ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
 
@@ -37,12 +39,6 @@ Dim strData As String
 Public Sub start()
     On Error GoTo Error_label
     
-    If Not Base.settings("voting").Exists("port") Then
-        Err.Raise 0, Description:="voting.port does not exist"
-    ElseIf notNumber(Base.settings("voting")("port")) Then
-        Err.Raise 0, Description:="voting.port is not a number"
-    End If
-    
     COMPort = Base.settings("voting")("port")
     
     lngStatus = CommOpen(COMPort, "COM" & COMPort, "baud=115200 parity=N data=8 stop=1")
@@ -51,14 +47,14 @@ Public Sub start()
         Err.Raise lngStatus, Description:=strError
     End If
     
-    lngStatus = CommSetLine(COMPort, LINE_RTS, True)
-    lngStatus = CommSetLine(COMPort, LINE_DTR, True)
+    CommSetLine COMPort, LINE_RTS, True
+    CommSetLine COMPort, LINE_DTR, True
 
     timerID = Base.SetTimer(0, 0, 100, AddressOf Run) ' ѕовтор€ть каждые 100 мс
     
     started = True
     
-    Logging.logInfo "Voting.start", "Communication started on COM port " & COMPort & ", frequency 115200 bauds, 8N1 configuration"
+    logging.logInfo "Voting.start", "Communication started on COM port " & COMPort & ", frequency 115200 bauds, 8N1 configuration"
     
     Exit Sub
 Error_label:
@@ -79,7 +75,7 @@ Sub Run()
     For Each key In Base.diagramShowKeys
     
         If Base.CheckKeyPressed(key) Then
-            With Diagram
+            With diagram
                 If .Visible Then
                     .Hide
                     
@@ -95,12 +91,12 @@ Sub Run()
     Next key
     
     
-    If Diagram.Visible Then
+    If diagram.Visible Then
         
         For Each key In Base.backwardKeys
             If Base.CheckKeyPressed(key) Then
                 clearVotes
-                Diagram.Hide
+                diagram.Hide
                 ActivePresentation.SlideShowWindow.View.GotoSlide lastSlide
             End If
         Next key
@@ -130,7 +126,7 @@ Public Sub finish()
         CommSetLine COMPort, LINE_DTR, False
         CommClose COMPort
         
-        Logging.logInfo "Voting.finish", "COM communication shut down"
+        logging.logInfo "Voting.finish", "COM communication shut down"
     End If
     
     started = False
@@ -165,9 +161,9 @@ End Sub
 Public Sub clearVotes()
     On Error GoTo Error_label
     
-    Diagram.clearVotes
+    diagram.clearVotes
     SendMessage "c"
-    Logging.logInfo "Voting.clearVotes", "All votes cleared from the server"
+    logging.logInfo "Voting.clearVotes", "All votes cleared from the server"
     
     Exit Sub
 Error_label:
@@ -193,19 +189,67 @@ Public Sub loadVotes()
         Err.Raise 0, Description:="Invalid JSON respond: no 'total' key"
     End If
     
-    Logging.logVotes votes
+    logging.logVotes votes
     
     Dim totalVotes(7) As Integer ' Ѕез этого >>Diagram.DrawValues votes("total")<< выбросит ошибку
+    '  опируем массив (на самом деле Variant) во временный (насто€щий массив)
     Dim i As Integer
     For i = 1 To 7
         totalVotes(i) = votes("total")(i)
     Next i
     
-    Diagram.DrawValues totalVotes
+    diagram.DrawValues totalVotes
     
     Exit Sub
 Error_label:
     Base.ShowError "Voting.loadVotes"
+End Sub
+
+
+Public Sub checkConnection()
+    On Error GoTo Error_label
+    
+    COMPort = Base.settings("voting")("port")
+    
+    lngStatus = CommOpen(COMPort, "COM" & COMPort, "baud=115200 parity=N data=8 stop=1")
+    If lngStatus <> 0 Then
+        MsgBox "Failed to connect (code: 1)", vbCritical, "PPVoting error"
+        Exit Sub
+    End If
+    
+    CommSetLine COMPort, LINE_RTS, True
+    CommSetLine COMPort, LINE_DTR, True
+    
+    lngStatus = CommWrite(COMPort, "k")
+    If lngStatus <> 1 Then
+        MsgBox "Failed to send validation request (code: 2)", vbCritical, "PPVoting error"
+        GoTo End_label
+    End If
+    
+    Base.Sleep 100
+    
+    lngStatus = CommRead(COMPort, strData, 2)
+    If lngStatus < 0 Then
+        MsgBox "Failed to get validation respond (code: 3)", vbCritical, "PPVoting error"
+        GoTo End_label
+    End If
+    
+    If strData <> "OK" Then
+        MsgBox "Validation failed (code: 4)", vbCritical, "PPVoting error"
+        GoTo End_label
+    End If
+    
+    MsgBox "Success", vbInformation, "PPVoting info"
+    
+End_label:
+    CommSetLine COMPort, LINE_RTS, False
+    CommSetLine COMPort, LINE_DTR, False
+    
+    CommClose COMPort
+    
+    Exit Sub
+Error_label:
+    Base.ShowError "Voting.checkConnection"
 End Sub
 
 

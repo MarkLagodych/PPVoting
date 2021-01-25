@@ -7,8 +7,8 @@ Attribute VB_Name = "Logging"
 '   - записывать различные ошибки и результаты опросов в файл. Путь к '
 '     файлу указан также в настройках PPVoting                        '
 ' Формат:                                                             '
-'   Ошибка:     [дата,время] ERROR (процедура) #номерОшибки: описание '
-'   Информация: [дата,время] INFO (процедура|голоса): ...             '
+'   Ошибка:     [дата время] ERROR (процедура) #номерОшибки: описание '
+'   Информация: [дата время] INFO (процедура|голоса): ...             '
 '                                                                     '
 ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
 
@@ -24,10 +24,6 @@ Private logFile As TextStream
 Public Sub start()
     On Error GoTo Error_label
     
-    If Not Base.settings("logging").Exists("file") Then
-        Err.Raise 1, Description:="logging.file does not exist"
-    End If
-    
     Set logFile = Base.FS.OpenTextFile(Base.settings("logging")("file"), ForAppending, True, TristateTrue)
     
     started = True
@@ -42,7 +38,7 @@ Error_label:
 End Sub
 
 ' Если Logging не используется (в настройках), ничего не делает
-Public Sub logError(proc As String, number As Integer, msg As String)
+Public Sub logError(proc As String, number As Long, msg As String)
     On Error GoTo Error_label
     
     If Not started Then Exit Sub
@@ -113,7 +109,7 @@ End Sub
 Public Sub finish()
     On Error GoTo Error_label
     
-    logInfo "Logging.finish", "Logging shut down"
+    logInfo "Logging.finish", "Logging turned off"
     
     If started Then
         logFile.Close

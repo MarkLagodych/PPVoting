@@ -9,49 +9,22 @@ Attribute VB_Name = "Base"
 ' ------------------------------------------------------------------- '
 '                                                                     '
 '                 * Настройка сообщений об ошибках *                  '
-'   1. Перейдите в Tools > VBAProject Properties.                     '
-'   2. В поле Conditional Compilation Arguments введите               '
-'      "SHOW_ERRORS = 1" без кавычек чтобы отображать                 '
-'      или "SHOW_ERRORS = 0" чтобы скрывать сообщения об ошибках.     '
+'   В Tools > VBAProject Properties в поле                            '
+'   "Conditional Compilation Arguments" введите "SHOW_ERRORS = 1" без '
+'   кавычек чтобы отображать или "SHOW_ERRORS = 0" чтобы скрывать     '
+'   сообщения об ошибках.                                             '
 '                                                                     '
 '                        * Экспорт плагина *                          '
-'   3. В основном окне PowerPoint, зайдите в Файл > Сохранить как...  '
-'   4. Выберите формат "PowerPoint Add-In (*.ppam)"                   '
-'      ("Надстройка PowerPoint (*.ppam)")                             '
-'   5. Нажмите "Сохранить"                                            '
+'   Файл > Сохранить как... > PowerPoint Add-In (*.ppam)              '
+'                          (Надстройка PowerPoint (*.ppam))           '
 '                                                                     '
 ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
 
 Option Explicit
 
-' Файл настроек (конфигурации) - файл в формате JSON,
-' имя которого указывается на первом слайде презентации.
-' Это должна быть ЕДИНСТВЕННАЯ надпись. Для удобства
-' слайд можно скрыть (контекстное меню > скрыть слайд).
-' Структура файла:
-' {
-'    "timer": {                        -- Настройки таймера
-'        "use": <boolean>,             -- Использовать таймер?
-'        "totalTime_min": <integer>,   -- Время на презентация (мин)
-'        "blushTime_min": <integer>,   -- За сколько минут до конца изменить фон на красноватый?
-'        "idleTime_sec": <integer>     -- При анимированном переключении слайдов, на сколько секунд
-'                                                   остановить обновление таймера?
-'    },
-'
-'    "voting": {                       -- Настройки голосования
-'        "use": <boolean>,             -- Использовать голосование?
-'        "port": <integer>             -- Номер COM-порта, к которому подключен сервер (ESP8266)
-'                                                   Можно узнать в диспетчере устройств
-'                                                   (Win+R > devmgmt.msc > OK)
-'    },
-'
-'    "logging": {                       -- Настройки очёта голосований
-'        "use": <boolean>,              -- Записывать ли результаты голосований в файл?
-'        "file": <string>               -- Путь к файлу (или просто имя фалйа)
-'    }
-' }
+
 Public FS As New FileSystemObject  ' Для чтения файлов
-Public settings As Dictionary      ' Сюда прочитаются настройки
+Public settings As New Dictionary  ' Сюда прочитаются настройки
 
 ' Нужно внутри OnSlideShowPageChange для срабатывания
 ' начального кода только один раз
@@ -60,6 +33,9 @@ Private started As Boolean
 
 ' Коды кнопок управления плагином
 Public forwardKeys(6), backwardKeys(6), diagramShowKeys(2) As Integer
+
+' Для запуска различных команд (как в командной строке)
+Public CmdShell As Object
 
 
 #If VBA7 Then
@@ -134,20 +110,43 @@ Sub Auto_Open()
     diagramShowKeys(1) = 87  ' W
     diagramShowKeys(2) = 188 ' ,
     
+    settings.Add "logging", New Dictionary
+    settings("logging").Add "use", False
+    settings("logging").Add "file", ""
+    
+    settings.Add "timer", New Dictionary
+    settings("timer").Add "use", False
+    settings("timer").Add "total_time", 2
+    settings("timer").Add "blush_time", 1
+    
+    settings.Add "voting", New Dictionary
+    settings("voting").Add "use", False
+    settings("voting").Add "port", 1
+    settings("voting").Add "diagram_width", 640
+    settings("voting").Add "diagram_height", 480
+    settings("voting").Add "diagram_gap", 10
+    
+    Set CmdShell = CreateObject("WScript.Shell")
+    
+    PPVotingUI.start
+    
 End Sub
 
 
 ' Эту процедуру вызывает любая другая при ошибке
 Sub ShowError(functionName As String)
-    Dim num As Integer
+    Dim num As Long
     Dim desc As String
     num = Err.number
     desc = Err.Description
     
-    Logging.logError functionName, num, desc
+    logging.logError functionName, num, desc
 
     #If SHOW_ERRORS = 1 Then
-        MsgBox Title:="PPVoting Error", Prompt:="Error " & num & " in " & functionName & ": " & vbNewLine & desc
+        MsgBox _
+            Title:="PPVoting error", _
+            Prompt:="Error " & num & " in " & functionName & ": " & vbNewLine & desc, _
+            Buttons:=vbCritical
     #End If
     
 End Sub
@@ -156,7 +155,10 @@ End Sub
 Sub ShowRawError(functionName)
 
     #If SHOW_ERRORS = 1 Then
-        MsgBox Title:="PPVoting Error", Prompt:="Error " & Err.number & " in " & functionName & ": " & vbNewLine & Err.Description
+        MsgBox _
+            Title:="PPVoting error", _
+            Prompt:="Error " & Err.number & " in " & functionName & ": " & vbNewLine & Err.Description, _
+            Buttons:=vbCritical
     #End If
     
 End Sub
@@ -169,23 +171,23 @@ Sub OnSlideShowPageChange()
     If Not started Then
     
         started = True
-        LoadSettings
         
+        ' Logging включаем первым
         If settings.Exists("logging") Then
             If settings("logging").Exists("use") Then
-                If settings("logging")("use") Then Logging.start
+                If settings("logging")("use") Then logging.start
             End If
         End If
         
         If settings.Exists("timer") Then
             If settings("timer").Exists("use") Then
-                If settings("timer")("use") Then Timer.start
+                If settings("timer")("use") Then timer.start
             End If
         End If
         
         If settings.Exists("voting") Then
             If settings("voting").Exists("use") Then
-                If settings("voting")("use") Then Voting.start
+                If settings("voting")("use") Then voting.start
             End If
         End If
         
@@ -204,9 +206,10 @@ Sub OnSlideShowTerminate()
     On Error GoTo Error_label
     
     started = False
-    If settings.Exists("timer") Then If settings("timer")("use") Then Timer.finish
-    If settings.Exists("voting") Then If settings("voting")("use") Then Voting.finish
-    If settings.Exists("logging") Then If settings("logging")("use") Then Logging.finish
+    If settings.Exists("timer") Then If settings("timer")("use") Then timer.finish
+    If settings.Exists("voting") Then If settings("voting")("use") Then voting.finish
+    If settings.Exists("logging") Then If settings("logging")("use") Then logging.finish
+    ' Logging выключаем последним
     
     Exit Sub
 Error_label:
@@ -214,25 +217,6 @@ Error_label:
     
 End Sub
 
-
-Public Sub LoadSettings()
-    On Error GoTo Error_label
-        
-    Dim fileName As String
-    
-    ' Массивы начинаются с 1
-    fileName = ActivePresentation.Slides(1).Shapes(1).TextFrame.TextRange.Text
-    
-    Dim file As TextStream
-    Set file = FS.OpenTextFile(fileName, ForReading)
-    Set settings = Json.ParseJson(file.ReadAll())
-    file.Close
-    
-    Exit Sub
-Error_label:
-    ShowRawError "Base.LoadSettings"
-
-End Sub
 
 
 
