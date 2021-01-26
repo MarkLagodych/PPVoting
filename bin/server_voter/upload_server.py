@@ -3,7 +3,7 @@ from uploader import *
 setPort('COM4')
 
 print('Uploading firmware...')
-#upload('server.bin')
+upload('server.bin')
 
 print()
 print('Entering settings mode...')
