@@ -32,4 +32,4 @@
         
     4. **Логгер** (модуль протоколирования) - записывает всю информацию, ошибки выполнения и результаты голосования в отдельный текстовый файл. Файл (log, журнал, протокол) нужно создать самостоятельно и указать путь к нему в меню PPVoting.
         
-        ![Log](https://github.com/MarkLagodych/assets/blob/main/PPVoting/log.PNG?raw=true)
+        ![Log](https://github.com/MarkLagodych/assets/blob/main/PPVoting/log.png?raw=true)
