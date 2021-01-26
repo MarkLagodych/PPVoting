@@ -16,33 +16,13 @@
 
 3. **Плагин** для Microsoft PowerPoint - состоит из нескольких компонентов:
 
-    1. **Загрузчик настроек** - находит файл настроек по содержанию первой надписи на первом слайде в презентации.
+    1. **Вкладка меню** - нужна для настройки всех частей плагина. Все настройки сохраняются на компьютере, в любой момент их можно удалить.
     
-        Пример файла (*кодировка системная!*):
-    
-        ```json
-            {
-                "timer": {
-                    "use": true,
-                    "totalTime_min": 3, 
-                    "blushTime_min": 2
-                },  
-                
-                "voting": {
-                    "use": true,
-                    "port": 4
-                },
-                
-                "logging": {
-                    "use": true,
-                    "file": "C:\\path\\to\\log\\file.txt"
-                }
-            }
-        ```
+        ![MenuTab](https://github.com/MarkLagodych/assets/blob/main/PPVoting/plugin.PNG?raw=true)
 
     2. **Диаграмма** - отображает статистику ответов.
 
-        ![Diagram](https://github.com/MarkLagodych/assets/blob/main/PPVoting/diagram.PNG?raw=true)
+        ![Diagram](https://github.com/MarkLagodych/assets/blob/main/PPVoting/diagram.png?raw=true)
     
     3. **Таймер** - небольшой прямоугольник в углу слайда с текущим временем и временем до конца доклада. За заданное кол-во минут до конца он должен сменить цвет на красноватый.
 
@@ -50,9 +30,4 @@
         
         ![Red](https://github.com/MarkLagodych/assets/blob/main/PPVoting/timer2.PNG?raw=true)
         
-# Примечания
-
-## Кодировка символов
-
-Файл настроек должен быть в Юникоде в кодировке как в ОС по умолчанию потому, что PowerPoint плохо справляется с UTF-8 
-
+        
