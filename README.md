@@ -14,7 +14,7 @@
 
     ![Server](https://github.com/MarkLagodych/assets/blob/main/PPVoting/server.jpg?raw=true)
 
-3. **Плагин** для Microsoft PowerPoint - состоит из нескольких компонентов:
+3. **Плагин** для Microsoft PowerPoint - состоит из нескольких модулей:
 
     1. **Вкладка меню** - нужна для настройки всех частей плагина. Все настройки сохраняются на компьютере, в любой момент их можно удалить.
     
@@ -30,4 +30,6 @@
         
         ![Red](https://github.com/MarkLagodych/assets/blob/main/PPVoting/timer2.PNG?raw=true)
         
+    4. **Логгер** (модуль протоколирования) - записывает всю информацию, ошибки выполнения и результаты голосования в отдельный текстовый файл. Файл (log, журнал, протокол) нужно создать самостоятельно и указать путь к нему в меню PPVoting.
         
+        ![Log](https://github.com/MarkLagodych/assets/blob/main/PPVoting/log.PNG?raw=true)

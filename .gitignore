@@ -1,2 +1,3 @@
 bin/server_voter/__pycache__
 bin/plugin/PPVoting_log.txt
+*.zip
