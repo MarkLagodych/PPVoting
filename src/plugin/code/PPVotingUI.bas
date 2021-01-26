@@ -14,13 +14,10 @@ Private ribbon As Office.IRibbonUI
 
 Const appName = "PPVoting"
 
-Public Sub start()
-    LoadSettings
-End Sub
-
 ' Вызывается один раз при загрузке вкладки меню
 Public Sub OnUILoaded(rbn As IRibbonUI)
     Set ribbon = rbn
+    LoadSettings
 End Sub
 
 Public Sub LoadSettings()
@@ -30,20 +27,36 @@ Public Sub LoadSettings()
         Err.Raise 1, Description:="UI is not initialized"
     End If
     
-    ' Загружаем настройки. Если каких-либо настроек не существует, оставить те, что были установлены в Base.Auto_Open()
+    ' Создание словаря настроек и установка значений по умолчанию
+    settings.Add "logging", New Dictionary
+    settings("logging").Add "use", False
+    settings("logging").Add "file", ""
     
-    Base.settings("logging")("use") = CBool(GetSetting(appName, "logging", "use", Base.settings("logging")("use")))
-    Base.settings("logging")("file") = GetSetting(appName, "logging", "file", Base.settings("logging")("file"))
+    settings.Add "timer", New Dictionary
+    settings("timer").Add "use", False
+    settings("timer").Add "total_time", 2
+    settings("timer").Add "blush_time", 1
     
-    Base.settings("timer")("use") = CBool(GetSetting(appName, "timer", "use", Base.settings("timer")("use")))
-    Base.settings("timer")("total_time") = CInt(GetSetting(appName, "timer", "total_time", Base.settings("timer")("total_time")))
-    Base.settings("timer")("total_time") = CInt(GetSetting(appName, "timer", "total_time", Base.settings("timer")("total_time")))
+    settings.Add "voting", New Dictionary
+    settings("voting").Add "use", False
+    settings("voting").Add "port", 1
+    settings("voting").Add "diagram_width", 640
+    settings("voting").Add "diagram_height", 480
+    settings("voting").Add "diagram_gap", 10
     
-    Base.settings("voting")("use") = CBool(GetSetting(appName, "voting", "use", Base.settings("voting")("use")))
-    Base.settings("voting")("port") = CInt(GetSetting(appName, "voting", "port", Base.settings("voting")("port")))
-    Base.settings("voting")("diagram_width") = CInt(GetSetting(appName, "voting", "diagram_width", Base.settings("voting")("diagram_width")))
-    Base.settings("voting")("diagram_height") = CInt(GetSetting(appName, "voting", "diagram_height", Base.settings("voting")("diagram_height")))
-    Base.settings("voting")("diagram_gap") = CInt(GetSetting(appName, "voting", "diagram_gap", Base.settings("voting")("diagram_gap")))
+    ' Загрузка настройки. Если какая-либо настройка не сохранена, оставить ту, что была установлена
+    Dim section, key As Variant
+    For Each section In Base.settings.Keys()
+        For Each key In Base.settings(section).Keys()
+            If key = "use" Then
+                settings(section)(key) = CBool(GetSetting(appName, section, key, settings(section)(key)))
+            ElseIf key = "file" Then
+                settings(section)(key) = GetSetting(appName, section, key, settings(section)(key))
+            Else
+                settings(section)(key) = CInt(GetSetting(appName, section, key, settings(section)(key)))
+            End If
+        Next key
+    Next section
     
     ' Обновить все виджеты
     ribbon.Invalidate
@@ -70,13 +83,13 @@ End Sub
 Public Sub ProcessText(control As IRibbonControl, text As String)
 
     If Not IsNumeric(text) Then
-        MsgBox "Integer positive number required!", vbCritical, "PPVoting error"
+        MsgBox "Positive integer number required!", vbCritical, "PPVoting error"
         ribbon.InvalidateControl control.id
         Exit Sub
     End If
     
     If CInt(text) <= 0 Then
-        MsgBox "Integer positive number required!", vbCritical, "PPVoting error"
+        MsgBox "Positive integer number required!", vbCritical, "PPVoting error"
         ribbon.InvalidateControl control.id
         Exit Sub
     End If

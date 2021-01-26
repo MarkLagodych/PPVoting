@@ -93,7 +93,7 @@ End Function
 
 
 ' Вызывается один раз при загрузке плагина
-Sub Auto_Open()
+Public Sub Auto_Open()
     
     forwardKeys(1) = 39 ' Стрелка вправо
     forwardKeys(2) = 40 ' Стрелка вниз
@@ -110,25 +110,7 @@ Sub Auto_Open()
     diagramShowKeys(1) = 87  ' W
     diagramShowKeys(2) = 188 ' ,
     
-    settings.Add "logging", New Dictionary
-    settings("logging").Add "use", False
-    settings("logging").Add "file", ""
-    
-    settings.Add "timer", New Dictionary
-    settings("timer").Add "use", False
-    settings("timer").Add "total_time", 2
-    settings("timer").Add "blush_time", 1
-    
-    settings.Add "voting", New Dictionary
-    settings("voting").Add "use", False
-    settings("voting").Add "port", 1
-    settings("voting").Add "diagram_width", 640
-    settings("voting").Add "diagram_height", 480
-    settings("voting").Add "diagram_gap", 10
-    
     Set CmdShell = CreateObject("WScript.Shell")
-    
-    PPVotingUI.start
     
 End Sub
 

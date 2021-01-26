@@ -83,6 +83,7 @@ Sub Run()
                     ActivePresentation.SlideShowWindow.View.GotoSlide lastSlide
                 Else
                     lastSlide = ActivePresentation.SlideShowWindow.View.slide.slideIndex
+                    loadVotes
                     .Show
                 End If
             End With

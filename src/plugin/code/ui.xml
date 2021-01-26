@@ -27,27 +27,6 @@
             <tab id = "PPVotingTab"
                 label = "PPVoting"> 
                 
-                <!--                
-                    <group id = "ActionsGroup"
-                        label = "Actions">
-                        
-                        <button id = "SaveSettingsBtn"
-                            label = "Save settings"
-                            imageMso = "FileSave"
-                            screentip = "Save settings to registry"
-                            size = "large"
-                            onAction = "PPVotingUI.SaveSettings"/>
-                        
-                        <button id = "LoadSettingsBtn"
-                            label = "Load settings"
-                            imageMso = "FileOpen"
-                            screentip = "Load settings from registry"
-                            size = "large"
-                            onAction = "PPVotingUI.LoadSettings"/>
-                            
-                    </group>
-                -->
-                
                 <group id = "UsageGroup"
                     label = "Usage">
                     
