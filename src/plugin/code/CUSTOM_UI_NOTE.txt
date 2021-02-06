@@ -1,8 +1,0 @@
-﻿Как добавлять custom UI к проекту (в данном случае, к .pptm файлу)
-1. Открыть .pptm как zip-файл
-2. Добить папку (напр. "PPVotingUI"), в неё этот .xml файл
-3. Отредактировать файл _rels/.rels -- перед тэгом </Relationships> вставить:
-    <Relationship
-        Id="PPVotingRelID" 
-        Type="http://schemas.microsoft.com/office/2006/relationships/ui/extensibility" 
-        Target="PPVotingUI/ui.xml"/>

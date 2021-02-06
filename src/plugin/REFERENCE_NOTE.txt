@@ -1,8 +1,0 @@
-Этот плагин PowerPoint успешно собрался с такими ссылками
-(окно "Visual Basic" > меню "Tools" > опция "References..."):
-	Visual Basic for Applications
-	Microsoft PowerPoint 16.0 Object Library
-	OLE Automation
-	Microsoft Office 16.0 Object Library
-	Microsoft Forms 2.0 Object Library
-	Microsoft Scripting Runtime

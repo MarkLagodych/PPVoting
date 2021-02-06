@@ -1,5 +1,0 @@
-* Настройка сообщений об ошибках *
-1. Перейдите в Tools > VBAProject Properties.
-2. В поле Conditional Compilation Arguments введите
-   "SHOW_ERRORS = 1" без кавычек чтобы отображать
-   или "SHOW_ERRORS = 0" чтобы скрывать сообщения об ошибках.
