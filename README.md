@@ -72,10 +72,10 @@
     
 ### Библиотеки
 
-    Все исходники сторонних библиотек лежат в `src/`
+Все исходники сторонних библиотек лежат в `src/`
 
-    - VBA-JSON: https://github.com/VBA-tools/VBA-JSON
-    - CommIO (общение по COM-порту): http://www.thescarms.com/VBasic/commio.aspx
+- VBA-JSON: https://github.com/VBA-tools/VBA-JSON
+- CommIO (общение по COM-порту): http://www.thescarms.com/VBasic/commio.aspx
     
 ### Настройка сообщений об ошибках
 
@@ -83,6 +83,8 @@
 2. В поле Conditional Compilation Arguments введите "SHOW_ERRORS = 1" без кавычек чтобы отображать или "SHOW_ERRORS = 0" чтобы скрывать сообщения об ошибках (постоянные всплывающие во время выполнения).
 
 ### Как добавлять custom UI к проекту (в данном случае, к .pptm файлу)
+
+https://docs.microsoft.com/en-us/office/vba/library-reference/concepts/customize-the-office-fluent-ribbon-by-using-an-open-xml-formats-file
 
 1. Открыть .pptm как zip-файл
 2. Добить папку (напр. "PPVotingUI"), в неё .xml файл интерфейса
@@ -103,3 +105,7 @@
 Все схемы были сделаны с помощью сайта easyeda.com
 
 Конечный экспортированный файл печатной платы - `src/voter/scheme/pcb/Gerber.zip`. Можно открыть (почти?) любым Gerber-viewer'ом, например https://www.altium.com/viewer/.
+
+Плата построена таким образом, что для питания установлена просто перемычка, а для прошития - целая гребёнка, на которую вешается перемычка и переходник UART-USB.
+
+![Voter connection](https://github.com/MarkLagodych/assets/blob/main/PPVoting/voter_expl.png?raw=true)
