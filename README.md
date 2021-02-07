@@ -42,7 +42,7 @@
         
 # Запуск
 
-Вот общий порядок действий, чтобы заставить работать бинарники проекта у себя на компьютере. Подробнее в [Примечания: проверка и настройка](#Примечания: проверка и настройка).
+Вот общий порядок действий, чтобы заставить работать бинарники проекта у себя на компьютере. Подробнее в [Примечания: проверка и настройка](#Примечания:-проверка-и-настройка).
 
 1. Установите плагин (надстройку PowerPoint) `bin/plugin/PPVoting.ppam`. Для этого в настройках PowerPoint'а в разделе "Настроить ленту" поставьте флажок напротив пункта "Разработчик", во вкладке меню, которая отобразится, нажмите на кнопку "Надстройки PowerPoint" и загрузите `PPVoting.ppam`. Отобразится ещё одна вкладка - "PPVoting"
     
@@ -136,7 +136,7 @@
 
 Все исходники сторонних библиотек лежат в `src/`
 
-- [VBA-JSON](https://github.com/VBA-tools/VBA-JSON)
+- [VBA-JSON](https://github.com/VBA-tools/VBA-JSON) (парсинг JSON)
 - [CommIO](http://www.thescarms.com/VBasic/commio.aspx) (общение по COM-порту)
     
 ### Настройка сообщений об ошибках
@@ -146,7 +146,7 @@
 
 ### Как добавлять custom UI к проекту (в данном случае, к .pptm файлу)
 
-[MSDocs-CustomUI](https://docs.microsoft.com/en-us/office/vba/library-reference/concepts/customize-the-office-fluent-ribbon-by-using-an-open-xml-formats-file)
+[Custom UI - Microsoft Docs](https://docs.microsoft.com/en-us/office/vba/library-reference/concepts/customize-the-office-fluent-ribbon-by-using-an-open-xml-formats-file)
 
 1. Открыть .pptm как zip-файл
 2. Добить папку (напр. "PPVotingUI"), в неё .xml файл интерфейса (например, `/src/plugin/code/ui.xml`)
