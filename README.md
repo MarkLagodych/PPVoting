@@ -1,6 +1,7 @@
 # PPVoting
-Обратная связь типа "вопрос"-"статистика ответов" во время презентаций в PowerPoint, а также небольшой таймер в углу экрана.
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/MarkLagodych/PPVoting)](https://github.com/MarkLagodych/PPVoting/releases/tag/v1.1)
 
+Обратная связь типа "вопрос"-"статистика ответов" во время презентаций в PowerPoint, а также небольшой таймер в углу экрана.
 
 ## Структура
 
