@@ -14,13 +14,13 @@
 
     ![Server](https://github.com/MarkLagodych/assets/blob/main/PPVoting/server.jpg?raw=true)
     
-    Для корректной работы нужен драйвер CH341SER. Его можно взять из bin/driver или с оф. сайта разработчика: http://www.wch.cn/downloads/CH341SER_EXE.html
+    Для корректной работы нужен драйвер CH341SER. Его можно взять из bin/driver или с оф. сайта разработчика: [CH341SER]
 
 3. **Плагин** для Microsoft PowerPoint - состоит из нескольких модулей:
 
-    1. **Вкладка меню** - нужна для настройки всех частей плагина. Все настройки сохраняются на компьютере (если конкретнее, в реестре). В любой момент их можно удалить кнопкой "Remove settings".
+    1. **Вкладка меню** - нужна для настройки всех частей плагина. Все настройки сохраняются на компьютере в реестре. В любой момент их можно удалить кнопкой "Remove settings".
     
-        ![MenuTab](https://github.com/MarkLagodych/assets/blob/main/PPVoting/plugin.PNG?raw=true)
+        ![PluginMenu](https://github.com/MarkLagodych/assets/blob/main/PPVoting/plugin.PNG?raw=true)
         
         Любой другой компонент плагина можно включить/выключить установив соответствующий флажок в группе "Usage".
 
@@ -34,9 +34,70 @@
         
         ![Red](https://github.com/MarkLagodych/assets/blob/main/PPVoting/timer2.PNG?raw=true)
         
+        После окончания показа слайдов все созданные прямоугольники удаляются.
+        
     4. **Логгер** (модуль протоколирования) - записывает всю информацию, ошибки выполнения и результаты голосования в отдельный текстовый файл. Файл (log, журнал, протокол) нужно создать самостоятельно и указать путь к нему в меню PPVoting.
         
         ![Log](https://github.com/MarkLagodych/assets/blob/main/PPVoting/log.png?raw=true)
+        
+# Запуск
+
+Вот общий порядок действий, чтобы заставить работать бинарники проекта у себя на компьютере. Подробнее в разделах "Примечания: проверка и настройка".
+
+1. Установите плагин (надстройку PowerPoint) `bin/plugin/PPVoting.ppam`. Для этого в настройках PowerPoint'а в разделе "Настроить ленту" поставьте флажок напротив пункта "Разработчик", во вкладке меню, которая отобразится, нажмите на кнопку "Надстройки PowerPoint" и загрузите `PPVoting.ppam`. Отобразится ещё одна вкладка - "PPVoting"
+    
+    ![MenuTab](https://github.com/MarkLagodych/assets/blob/main/PPVoting/menutab.png?raw=true)
+    
+2. Настройте плагин как Вам угодно. Вот за что отвечает каждый виджет:
+    | Раздел | Виджет(ы) | Значение |
+    | --- | --- | --- |
+    | Usage | Флажки | Включают/отключают компоненты плагина |
+    | Timer | Time | Время (в минутах) доклада -- для обратного отсчёта таймера |
+    | Timer | Blush | Время (в минутах) покраснения -- за это количество времени до конца доклада прямоугольник таймера изменит цвет  |
+    | Voting | Поле COM | Номер COM-порта, к которому подключен сервер |
+    | Voting | Check | Кнопка проверки (валидации) соединения по COM-порту. Если контакт плохой или к этому порту подключен не сервер, вылетит ошибка |
+    | Voting | Поля "Diagram size" и поле gap | Размер диаграммы (соответственно ширина и высота) в пикселях и расстояние между столбиками (горизонтальными синими линиями) |
+    | Logging | Кнопки выбора и просмотра файла отчёта | Выбор файла (сам плагин создать его не может) и просмотр в блокноте |
+    | Special actions | Кнопка "Device manager" | Запускает devmgmt.msc |
+    | Special actions | Кнопка "Remove settings" | Удаляет настройки PPVoting с компьютера |
+    
+3. Установите `bin/driver/CH341SER.EXE`.
+
+4. Подключите сервер. Проверьте подключение с помощью кнопки "Check" во вкладке PPVoting. Если не отобразилось сообщение "Success", попробуйте сменить шнур/порт/модуль ESP, чтобы получить "Success".
+
+5. Включите голосовалки (можно без них, используя телефон. Об этом в "Примечания: проверка и настройка" > "WiFi-сеть сервера")
+
+6. Откройте презентацию PowerPoint (любую), запустите показ слайдов (слайд-шоу). Вот функционал плагина во время слайд-шоу:
+    1. Таймер - в левом верхнем углу экрана.
+    2. Диаграмма - нажмите W или , (кирилличная Б) для показа/скрытия статистики ответов. Когда диаграмма видна, нажатие любой кнопки переключения слайдов вперёд обновляет статистику, а кнопки назад - удаляет статистику и закрывает диаграмму.
+    3. Логгер - подробный отсчёт о работе плагина. Записывает в файл ошибки, информацию о соединении с сервером, общую статистику ответов и подробный отсчёт о каждом голосовавшем: IP - номер голоса.
+
+# Прошивка сервера и голосовалок, компиляция прошивок
+
+О тонкостях в разделе "Примечания: компиляция и сборка".
+
+1. Установите Python3, с помощью pip установите библиотеки PySerial и ESPTool:
+    ```sh
+    py -m pip install pyserial
+    py -m pip install esptool
+    ```
+    Возможны и другие варианты запуска pip: `pip ...`, `python -m pip ...`, `py3 -m pip ...`, `python3 -m pip ...`.
+    
+2. Установите Arduino IDE, с помощью менеджера плат установите пакет esp8266:
+    1. Файл > Найтройки > в поле "Дополнительные ссылки для менеджера плат" вставьте http://arduino.esp8266.com/stable/package_esp8266com_index.json
+    2. Инструменты > Плата > Менеджер плат... > Наберите "ESP", выберите "esp8266 by ESP8266 Community" > нажмите кнопку "Установка"
+    
+3. По очереди откройте скетчи .ino в `src/server` и `src/voter`. Для каждого выполните "Скетч > Экспорт бинарного файла". Полученные бинарники перетащите в `bin/server_voter` и переименуйте на "server.bin" и "voter.bin".
+
+4. (По желанию) отредактируйте загрузчики upload_server.py и upload_voter.py. Главное в них: COM-порт прошивки и настройки WiFi. Также можно отредактировать uploader.py (в нём все функции по загрузке прошивки и настроек), например подкорректировать таймауты. 
+
+5. Запустите загрузчики. Чтобы удостовериться в том, что настройки были записаны, запустите скрипт check_settings.py
+
+** Голосовалке для записи настроек нужно нажать на среднюю кнопку. ** Если Вы используете схему из `src/voter/scheme`, для того, чтобы подключить и прошить голосовалку, посмотрите  "Примечания: компиляция и сборка" > "Печатная плата".
+
+# Компиляция плагина
+
+Вот подробные шаги, как компилировать и экспортировать различные части проекта. О тонкостях в разделе "Примечания: компиляция и сборка".
         
 # Примечания: проверка и настройка
 
@@ -64,18 +125,19 @@
 ### Ссылки
 
 Этот плагин PowerPoint успешно собрался с такими ссылками (окно "Visual Basic" > меню "Tools" > опция "References..."):
-	- Visual Basic for Applications
-	- Microsoft PowerPoint 16.0 Object Library
-	- Microsoft Office 16.0 Object Library
-	- Microsoft Forms 2.0 Object Library
-	- Microsoft Scripting Runtime
+
+- Visual Basic for Applications
+- Microsoft PowerPoint 16.0 Object Library
+- Microsoft Office 16.0 Object Library
+- Microsoft Forms 2.0 Object Library
+- Microsoft Scripting Runtime
     
 ### Библиотеки
 
 Все исходники сторонних библиотек лежат в `src/`
 
-- VBA-JSON: https://github.com/VBA-tools/VBA-JSON
-- CommIO (общение по COM-порту): http://www.thescarms.com/VBasic/commio.aspx
+- [VBA-JSON] 
+- [CommIO] (общение по COM-порту)
     
 ### Настройка сообщений об ошибках
 
@@ -84,15 +146,19 @@
 
 ### Как добавлять custom UI к проекту (в данном случае, к .pptm файлу)
 
-https://docs.microsoft.com/en-us/office/vba/library-reference/concepts/customize-the-office-fluent-ribbon-by-using-an-open-xml-formats-file
+[MSDocs-CustomUI]
 
 1. Открыть .pptm как zip-файл
-2. Добить папку (напр. "PPVotingUI"), в неё .xml файл интерфейса
-3. Отредактировать файл _rels/.rels -- перед тэгом </Relationships> вставить:
+2. Добить папку (напр. "PPVotingUI"), в неё .xml файл интерфейса (например, `/src/plugin/code/ui.xml`)
+3. Отредактировать файл _rels/.rels -- перед тэгом `</Relationships>` вставить:
+    ```xml
     <Relationship
         Id="PPVotingRelID" 
         Type="http://schemas.microsoft.com/office/2006/relationships/ui/extensibility" 
         Target="PPVotingUI/ui.xml"/>
+    ```
+        
+Если требуется отредактировать существующий интерфейс, шаг 3 можно не выполнять
         
 ## Сервер и голосовалки
 
@@ -109,3 +175,9 @@ https://docs.microsoft.com/en-us/office/vba/library-reference/concepts/customize
 Плата построена таким образом, что для питания установлена просто перемычка, а для прошития - целая гребёнка, на которую вешается перемычка и переходник UART-USB.
 
 ![Voter connection](https://github.com/MarkLagodych/assets/blob/main/PPVoting/voter_expl.png?raw=true)
+
+[//]:
+    [VBA-JSON]: <https://github.com/VBA-tools/VBA-JSON>
+    [CommIO]: <http://www.thescarms.com/VBasic/commio.aspx>
+    [MSDocs-CustomUI]: <https://docs.microsoft.com/en-us/office/vba/library-reference/concepts/customize-the-office-fluent-ribbon-by-using-an-open-xml-formats-file>
+    [CH341SER]: <http://www.wch.cn/downloads/CH341SER_EXE.html>
