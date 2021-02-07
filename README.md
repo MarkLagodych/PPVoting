@@ -14,7 +14,7 @@
 
     ![Server](https://github.com/MarkLagodych/assets/blob/main/PPVoting/server.jpg?raw=true)
     
-    Для корректной работы нужен драйвер CH341SER. Его можно взять из bin/driver или с оф. сайта разработчика: [CH341SER]
+    Для корректной работы нужен драйвер CH341SER. Его можно взять из bin/driver или с оф. сайта разработчика: [CH341SER](http://www.wch.cn/downloads/CH341SER_EXE.html)
 
 3. **Плагин** для Microsoft PowerPoint - состоит из нескольких модулей:
 
@@ -42,7 +42,7 @@
         
 # Запуск
 
-Вот общий порядок действий, чтобы заставить работать бинарники проекта у себя на компьютере. Подробнее в разделах "Примечания: проверка и настройка".
+Вот общий порядок действий, чтобы заставить работать бинарники проекта у себя на компьютере. Подробнее в [Примечания: проверка и настройка](#Примечания: проверка и настройка).
 
 1. Установите плагин (надстройку PowerPoint) `bin/plugin/PPVoting.ppam`. Для этого в настройках PowerPoint'а в разделе "Настроить ленту" поставьте флажок напротив пункта "Разработчик", во вкладке меню, которая отобразится, нажмите на кнопку "Надстройки PowerPoint" и загрузите `PPVoting.ppam`. Отобразится ещё одна вкладка - "PPVoting"
     
@@ -76,7 +76,7 @@
 
 О тонкостях в разделе "Примечания: компиляция и сборка".
 
-1. Установите Python3, с помощью pip установите библиотеки PySerial и ESPTool:
+1. Установите Python3, с помощью pip установите библиотеки PySerial и EspTool:
     ```sh
     py -m pip install pyserial
     py -m pip install esptool
@@ -136,8 +136,8 @@
 
 Все исходники сторонних библиотек лежат в `src/`
 
-- [VBA-JSON] 
-- [CommIO] (общение по COM-порту)
+- [VBA-JSON](https://github.com/VBA-tools/VBA-JSON)
+- [CommIO](http://www.thescarms.com/VBasic/commio.aspx) (общение по COM-порту)
     
 ### Настройка сообщений об ошибках
 
@@ -146,7 +146,7 @@
 
 ### Как добавлять custom UI к проекту (в данном случае, к .pptm файлу)
 
-[MSDocs-CustomUI]
+[MSDocs-CustomUI](https://docs.microsoft.com/en-us/office/vba/library-reference/concepts/customize-the-office-fluent-ribbon-by-using-an-open-xml-formats-file)
 
 1. Открыть .pptm как zip-файл
 2. Добить папку (напр. "PPVotingUI"), в неё .xml файл интерфейса (например, `/src/plugin/code/ui.xml`)
@@ -175,9 +175,3 @@
 Плата построена таким образом, что для питания установлена просто перемычка, а для прошития - целая гребёнка, на которую вешается перемычка и переходник UART-USB.
 
 ![Voter connection](https://github.com/MarkLagodych/assets/blob/main/PPVoting/voter_expl.png?raw=true)
-
-[//]:
-    [VBA-JSON]: <https://github.com/VBA-tools/VBA-JSON>
-    [CommIO]: <http://www.thescarms.com/VBasic/commio.aspx>
-    [MSDocs-CustomUI]: <https://docs.microsoft.com/en-us/office/vba/library-reference/concepts/customize-the-office-fluent-ribbon-by-using-an-open-xml-formats-file>
-    [CH341SER]: <http://www.wch.cn/downloads/CH341SER_EXE.html>
