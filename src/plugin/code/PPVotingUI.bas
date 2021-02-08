@@ -1,10 +1,10 @@
 Attribute VB_Name = "PPVotingUI"
 ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
-'                   ВКЛАДКА "PPVOTING" ДЛЯ POWERPOINT                 '
+'                   Р’РљР›РђР”РљРђ "PPVOTING" Р”Р›РЇ POWERPOINT                 '
 ' ------------------------------------------------------------------- '
 '                                                                     '
-' Этот модуль обрабатывает все виджеты во вкладке "PPVoting" в ленте  '
-' PowerPoint. Все настройки сохраняются с помощью SaveSetting.        '
+' Р­С‚РѕС‚ РјРѕРґСѓР»СЊ РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚ РІСЃРµ РІРёРґР¶РµС‚С‹ РІРѕ РІРєР»Р°РґРєРµ "PPVoting" РІ Р»РµРЅС‚Рµ  '
+' PowerPoint. Р’СЃРµ РЅР°СЃС‚СЂРѕР№РєРё СЃРѕС…СЂР°РЅСЏСЋС‚СЃСЏ СЃ РїРѕРјРѕС‰СЊСЋ SaveSetting.        '
 '                                                                     '
 ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
 
@@ -14,7 +14,7 @@ Private ribbon As Office.IRibbonUI
 
 Const appName = "PPVoting"
 
-' Вызывается один раз при загрузке вкладки меню
+' Р’С‹Р·С‹РІР°РµС‚СЃСЏ РѕРґРёРЅ СЂР°Р· РїСЂРё Р·Р°РіСЂСѓР·РєРµ РІРєР»Р°РґРєРё РјРµРЅСЋ
 Public Sub OnUILoaded(rbn As IRibbonUI)
     Set ribbon = rbn
     LoadSettings
@@ -27,7 +27,7 @@ Public Sub LoadSettings()
         Err.Raise 1, Description:="UI is not initialized"
     End If
     
-    ' Создание словаря настроек и установка значений по умолчанию
+    ' РЎРѕР·РґР°РЅРёРµ СЃР»РѕРІР°СЂСЏ РЅР°СЃС‚СЂРѕРµРє Рё СѓСЃС‚Р°РЅРѕРІРєР° Р·РЅР°С‡РµРЅРёР№ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
     settings.Add "logging", New Dictionary
     settings("logging").Add "use", False
     settings("logging").Add "file", ""
@@ -44,7 +44,7 @@ Public Sub LoadSettings()
     settings("voting").Add "diagram_height", 480
     settings("voting").Add "diagram_gap", 10
     
-    ' Загрузка настройки. Если какая-либо настройка не сохранена, оставить ту, что была установлена
+    ' Р—Р°РіСЂСѓР·РєР° РЅР°СЃС‚СЂРѕР№РєРё. Р•СЃР»Рё РєР°РєР°СЏ-Р»РёР±Рѕ РЅР°СЃС‚СЂРѕР№РєР° РЅРµ СЃРѕС…СЂР°РЅРµРЅР°, РѕСЃС‚Р°РІРёС‚СЊ С‚Сѓ, С‡С‚Рѕ Р±С‹Р»Р° СѓСЃС‚Р°РЅРѕРІР»РµРЅР°
     Dim section, key As Variant
     For Each section In Base.settings.Keys()
         For Each key In Base.settings(section).Keys()
@@ -58,7 +58,7 @@ Public Sub LoadSettings()
         Next key
     Next section
     
-    ' Обновить все виджеты
+    ' РћР±РЅРѕРІРёС‚СЊ РІСЃРµ РІРёРґР¶РµС‚С‹
     ribbon.Invalidate
     
     Exit Sub
@@ -151,7 +151,7 @@ Public Sub ViewLogFile()
     On Error GoTo Error_label
     
     Dim q As String
-    q = """" ' На самом деле, одна двойная кавычка
+    q = """" ' РќР° СЃР°РјРѕРј РґРµР»Рµ, РѕРґРЅР° РґРІРѕР№РЅР°СЏ РєР°РІС‹С‡РєР°
     
     Dim path As String
     path = Base.settings("logging")("file")

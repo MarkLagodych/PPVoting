@@ -1,40 +1,40 @@
 Attribute VB_Name = "Base"
 ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
-'                ПЛАГИН PPVOTING ДЛЯ MICROSOFT POWERPOINT             '
+'                РџР›РђР“РРќ PPVOTING Р”Р›РЇ MICROSOFT POWERPOINT             '
 ' ------------------------------------------------------------------- '
-' Эта программа является плагином для Microsoft PowerPoint. Она       '
-' добавляет таймер, указывающий на текущее и оставшееся время,        '
-' а также занимается приёмом информации от голосовальной системы и ёё '
-' отображением в виде диаграммы.                                      '
+' Р­С‚Р° РїСЂРѕРіСЂР°РјРјР° СЏРІР»СЏРµС‚СЃСЏ РїР»Р°РіРёРЅРѕРј РґР»СЏ Microsoft PowerPoint. РћРЅР°       '
+' РґРѕР±Р°РІР»СЏРµС‚ С‚Р°Р№РјРµСЂ, СѓРєР°Р·С‹РІР°СЋС‰РёР№ РЅР° С‚РµРєСѓС‰РµРµ Рё РѕСЃС‚Р°РІС€РµРµСЃСЏ РІСЂРµРјСЏ,        '
+' Р° С‚Р°РєР¶Рµ Р·Р°РЅРёРјР°РµС‚СЃСЏ РїСЂРёС‘РјРѕРј РёРЅС„РѕСЂРјР°С†РёРё РѕС‚ РіРѕР»РѕСЃРѕРІР°Р»СЊРЅРѕР№ СЃРёСЃС‚РµРјС‹ Рё С‘С‘ '
+' РѕС‚РѕР±СЂР°Р¶РµРЅРёРµРј РІ РІРёРґРµ РґРёР°РіСЂР°РјРјС‹.                                      '
 ' ------------------------------------------------------------------- '
 '                                                                     '
-'                 * Настройка сообщений об ошибках *                  '
-'   В Tools > VBAProject Properties в поле                            '
-'   "Conditional Compilation Arguments" введите "SHOW_ERRORS = 1" без '
-'   кавычек чтобы отображать или "SHOW_ERRORS = 0" чтобы скрывать     '
-'   сообщения об ошибках.                                             '
+'                 * РќР°СЃС‚СЂРѕР№РєР° СЃРѕРѕР±С‰РµРЅРёР№ РѕР± РѕС€РёР±РєР°С… *                  '
+'   Р’ Tools > VBAProject Properties РІ РїРѕР»Рµ                            '
+'   "Conditional Compilation Arguments" РІРІРµРґРёС‚Рµ "SHOW_ERRORS = 1" Р±РµР· '
+'   РєР°РІС‹С‡РµРє С‡С‚РѕР±С‹ РѕС‚РѕР±СЂР°Р¶Р°С‚СЊ РёР»Рё "SHOW_ERRORS = 0" С‡С‚РѕР±С‹ СЃРєСЂС‹РІР°С‚СЊ     '
+'   СЃРѕРѕР±С‰РµРЅРёСЏ РѕР± РѕС€РёР±РєР°С….                                             '
 '                                                                     '
-'                        * Экспорт плагина *                          '
-'   Файл > Сохранить как... > PowerPoint Add-In (*.ppam)              '
-'                          (Надстройка PowerPoint (*.ppam))           '
+'                        * Р­РєСЃРїРѕСЂС‚ РїР»Р°РіРёРЅР° *                          '
+'   Р¤Р°Р№Р» > РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє... > PowerPoint Add-In (*.ppam)              '
+'                          (РќР°РґСЃС‚СЂРѕР№РєР° PowerPoint (*.ppam))           '
 '                                                                     '
 ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
 
 Option Explicit
 
 
-Public FS As New FileSystemObject  ' Для чтения файлов
-Public settings As New Dictionary  ' Сюда прочитаются настройки
+Public FS As New FileSystemObject  ' Р”Р»СЏ С‡С‚РµРЅРёСЏ С„Р°Р№Р»РѕРІ
+Public settings As New Dictionary  ' РЎСЋРґР° РїСЂРѕС‡РёС‚Р°СЋС‚СЃСЏ РЅР°СЃС‚СЂРѕР№РєРё
 
-' Нужно внутри OnSlideShowPageChange для срабатывания
-' начального кода только один раз
-' После OnSlideShowTerminate устанавливается в False
+' РќСѓР¶РЅРѕ РІРЅСѓС‚СЂРё OnSlideShowPageChange РґР»СЏ СЃСЂР°Р±Р°С‚С‹РІР°РЅРёСЏ
+' РЅР°С‡Р°Р»СЊРЅРѕРіРѕ РєРѕРґР° С‚РѕР»СЊРєРѕ РѕРґРёРЅ СЂР°Р·
+' РџРѕСЃР»Рµ OnSlideShowTerminate СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ РІ False
 Private started As Boolean
 
-' Коды кнопок управления плагином
+' РљРѕРґС‹ РєРЅРѕРїРѕРє СѓРїСЂР°РІР»РµРЅРёСЏ РїР»Р°РіРёРЅРѕРј
 Public forwardKeys(6), backwardKeys(6), diagramShowKeys(2) As Integer
 
-' Для запуска различных команд (как в командной строке)
+' Р”Р»СЏ Р·Р°РїСѓСЃРєР° СЂР°Р·Р»РёС‡РЅС‹С… РєРѕРјР°РЅРґ (РєР°Рє РІ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРµ)
 Public CmdShell As Object
 
 
@@ -81,7 +81,7 @@ Public CmdShell As Object
         (ByVal dwMilliseconds As Long)
 #End If
 
-' Проверка на числовой тип
+' РџСЂРѕРІРµСЂРєР° РЅР° С‡РёСЃР»РѕРІРѕР№ С‚РёРї
 Public Function notNumber(x As Variant) As Boolean
     Select Case VarType(x)
         Case VBA.vbInteger, VBA.vbLong, VBA.vbSingle, VBA.vbDouble, VBA.vbCurrency, VBA.vbDecimal
@@ -92,18 +92,18 @@ Public Function notNumber(x As Variant) As Boolean
 End Function
 
 
-' Вызывается один раз при загрузке плагина
+' Р’С‹Р·С‹РІР°РµС‚СЃСЏ РѕРґРёРЅ СЂР°Р· РїСЂРё Р·Р°РіСЂСѓР·РєРµ РїР»Р°РіРёРЅР°
 Public Sub Auto_Open()
     
-    forwardKeys(1) = 39 ' Стрелка вправо
-    forwardKeys(2) = 40 ' Стрелка вниз
+    forwardKeys(1) = 39 ' РЎС‚СЂРµР»РєР° РІРїСЂР°РІРѕ
+    forwardKeys(2) = 40 ' РЎС‚СЂРµР»РєР° РІРЅРёР·
     forwardKeys(3) = 34 ' Page DOWN
     forwardKeys(4) = 78 ' N
     forwardKeys(5) = 13 ' Enter
-    forwardKeys(6) = 32 ' Пробел
+    forwardKeys(6) = 32 ' РџСЂРѕР±РµР»
     
-    backwardKeys(1) = 37 ' Стрелка влево
-    backwardKeys(2) = 38 ' Стрелка вверх
+    backwardKeys(1) = 37 ' РЎС‚СЂРµР»РєР° РІР»РµРІРѕ
+    backwardKeys(2) = 38 ' РЎС‚СЂРµР»РєР° РІРІРµСЂС…
     backwardKeys(3) = 33 ' Page UP
     backwardKeys(4) = 80 ' P
     
@@ -115,7 +115,7 @@ Public Sub Auto_Open()
 End Sub
 
 
-' Эту процедуру вызывает любая другая при ошибке
+' Р­С‚Сѓ РїСЂРѕС†РµРґСѓСЂСѓ РІС‹Р·С‹РІР°РµС‚ Р»СЋР±Р°СЏ РґСЂСѓРіР°СЏ РїСЂРё РѕС€РёР±РєРµ
 Sub ShowError(functionName As String)
     Dim num As Long
     Dim desc As String
@@ -133,7 +133,7 @@ Sub ShowError(functionName As String)
     
 End Sub
 
-' Для вызова в Loging -- без рекурсии
+' Р”Р»СЏ РІС‹Р·РѕРІР° РІ Loging -- Р±РµР· СЂРµРєСѓСЂСЃРёРё
 Sub ShowRawError(functionName)
 
     #If SHOW_ERRORS = 1 Then
@@ -146,7 +146,7 @@ Sub ShowRawError(functionName)
 End Sub
 
 
-' ======================== ГЛАВНАЯ ФУНКЦИЯ ==========================
+' ======================== Р“Р›РђР’РќРђРЇ Р¤РЈРќРљР¦РРЇ ==========================
 Sub OnSlideShowPageChange()
     On Error GoTo Error_label
 
@@ -154,7 +154,7 @@ Sub OnSlideShowPageChange()
     
         started = True
         
-        ' Logging включаем первым
+        ' Logging РІРєР»СЋС‡Р°РµРј РїРµСЂРІС‹Рј
         If settings.Exists("logging") Then
             If settings("logging").Exists("use") Then
                 If settings("logging")("use") Then logging.start
@@ -191,7 +191,7 @@ Sub OnSlideShowTerminate()
     If settings.Exists("timer") Then If settings("timer")("use") Then timer.finish
     If settings.Exists("voting") Then If settings("voting")("use") Then voting.finish
     If settings.Exists("logging") Then If settings("logging")("use") Then logging.finish
-    ' Logging выключаем последним
+    ' Logging РІС‹РєР»СЋС‡Р°РµРј РїРѕСЃР»РµРґРЅРёРј
     
     Exit Sub
 Error_label:
