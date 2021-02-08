@@ -1,5 +1,5 @@
 # PPVoting
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/MarkLagodych/PPVoting)](https://github.com/MarkLagodych/PPVoting/releases/latest) [![Platforms](https://img.shields.io/badge/platform-Windows-blue)]() [![Target](https://img.shields.io/badge/target-Microsoft_PowerPoint-orange)]()
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/MarkLagodych/PPVoting)](https://github.com/MarkLagodych/PPVoting/releases/latest) ![Platforms](https://img.shields.io/badge/platform-Windows-blue) ![Target](https://img.shields.io/badge/target-Microsoft_PowerPoint-orange)
 
 Обратная связь типа "вопрос"-"статистика ответов" во время презентаций в PowerPoint, а также небольшой таймер в углу экрана.
 
