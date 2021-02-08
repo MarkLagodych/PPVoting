@@ -74,7 +74,7 @@ settings_dict = {
 }
 
 TYPE_VOTER = 1
-TYPE_SERVER = 2 # Внешняя Wi-Fi сеть
+TYPE_SERVER = 2 # Внешняя WiFi сеть
 TYPE_SERVER_AP = 3 # AccessPoint - создать собственную сеть
 
 def translateSetting(s):
@@ -92,7 +92,7 @@ def beginSettings(freq = 115200):
         ser.close()
     ser.baudrate = freq
     ser.port = port
-    ser.timeout = 5 # сукунд
+    ser.timeout = 5 # секунд
 
     ser.open()
     ser.reset_input_buffer()
@@ -123,8 +123,8 @@ def query(q, wait = False):
             sleep(0.5)
         while ser.in_waiting > 0:
             res = ser.read(size = ser.in_waiting)
-            # backslashreplace -- заменить все non-ASCII символы на "\\xYZ"
-            # где YZ -- шестнадцатиричный код
+            # backslashreplace -- заменить все non-ASCII символы на "\\xHH"
+            # где HH -- шестнадцатеричный код
             print(res.decode(encoding='ASCII', errors='backslashreplace'))
 
             sleep(0.5)
@@ -137,7 +137,7 @@ def readSettings():
 
 def writeSettings():
     '''
-    Даёт команду модулю записаить настройки из RAM в EEPROM
+    Даёт команду модулю записать настройки из RAM в EEPROM
     '''
     query(b'w') # Write
 
