@@ -134,7 +134,7 @@
     
 ### Библиотеки
 
-Все исходники сторонних библиотек лежат в `src/`
+Все исходники сторонних библиотек лежат в `lib/`
 
 - [VBA-JSON](https://github.com/VBA-tools/VBA-JSON) (парсинг JSON)
 - [CommIO](http://www.thescarms.com/VBasic/commio.aspx) (общение по COM-порту)
