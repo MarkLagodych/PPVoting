@@ -1,4 +1,4 @@
-from uploader import *
+from common import *
 beginSettings()
 readSettings()
 getSettings()

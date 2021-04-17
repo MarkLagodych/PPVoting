@@ -1,4 +1,4 @@
-from uploader import *
+from common import *
 
 setPort('COM4')
 
@@ -8,9 +8,9 @@ upload('server.bin')
 print()
 print('Entering settings mode...')
 beginSettings()
+readSettings()
 
 print('Current settings:')
-readSettings()
 getSettings()
 
 print('Writing settings...')
@@ -27,6 +27,9 @@ print('Current settings:')
 readSettings()
 getSettings()
 
+print('Leaving settings mode...')
 endSettings()
+
+print('Done!!!')
 
 

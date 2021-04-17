@@ -1,4 +1,4 @@
-from uploader import *
+from common import *
 
 setPort('COM4')
 
@@ -8,7 +8,6 @@ upload('voter.bin')
 print()
 print('Entering settings mode...')
 beginSettings()
-
 readSettings()
 
 print('Current settings:')
@@ -28,4 +27,7 @@ print('Current settings:')
 readSettings()
 getSettings()
 
+print('Leaving settings mode...')
 endSettings()
+
+print('Done!!!')

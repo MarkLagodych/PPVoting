@@ -37,16 +37,18 @@ def getPort():
 
 def upload(firmware_file):
     '''
-    Загружает прошивку
+    Загружает прошивку в память ESP8266
     firmware_file -- название бинарного файла прошивки
     '''
-    
+
+    # Стирает всё, что есть в памяти
     esptool.main([
         '--p',
         port,
         'erase_flash'
     ])
-    
+
+    # Загружает прошивку
     esptool.main([
         '--p',
         port,
@@ -59,7 +61,7 @@ def upload(firmware_file):
     ])
 
 
-
+# Названия отдельных параметров для команды "s" (set) в режиме настроек 
 settings_dict = {
     'ssid':        's',
     'password':    'p',
@@ -73,9 +75,10 @@ settings_dict = {
     'type':        't'
 }
 
-TYPE_VOTER = 1
-TYPE_SERVER = 2 # Внешняя WiFi сеть
-TYPE_SERVER_AP = 3 # AccessPoint - создать собственную сеть
+# Типы модулей ESP8266. Прочтя тип из настроек, модуль понимает, как работать
+TYPE_VOTER     = 1 # Пульт (голосовалка)
+TYPE_SERVER    = 2 # Сервер, внешняя WiFi сеть
+TYPE_SERVER_AP = 3 # Сервер, собственная WiFi сеть (AP - AccessPoint)
 
 def translateSetting(s):
     keys = list(settings_dict.keys())
@@ -143,7 +146,7 @@ def writeSettings():
 
 def getSettings():
     '''
-    Запросить и напечатать все настройки из RAM
+    Запросить и вывести на экран все настройки из RAM
     '''
     query(b'g', True) # Get
 
