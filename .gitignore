@@ -1,4 +1,4 @@
 bin/server_voter/__pycache__
 log.*
 *.zip
-demo
+~*
