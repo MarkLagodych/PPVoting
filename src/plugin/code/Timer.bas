@@ -148,10 +148,10 @@ Sub Run()
                 .Fill.BackColor.RGB = RGB(255, 255, 255)
                 .TextFrame.TextRange.Font.Color.RGB = RGB(0, 0, 0)
                 .name = TimerShapeName
-                .TextFrame.TextRange.text = FormatTime() ' "12:34:56 | 01:23"
                 .TextFrame.TextRange.Font.name = "Arial"
                 .TextFrame.TextRange.Font.Bold = True
                 .TextFrame.TextRange.Font.Size = 12
+                .TextFrame.TextRange.text = FormatTime() ' "12:34:56 | 01:23"
             End With
         Else
             If endTime - currentTime <= blushTime Then
